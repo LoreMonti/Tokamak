@@ -126,16 +126,18 @@ def reactivity_dt(T_keV: ArrayLike) -> NDArray[np.float64]:
 
     Note
     ----
-    Valida ~0.5-200 keV. Fuori range emettiamo un avviso (extrapolazione spline),
-    senza interrompere scan di temperatura che sconfinano ai bordi.
+    Valida ~0.5-200 keV. Sotto 0.5 keV la reattivita' e' trascurabile e
+    l'extrapolazione (verso valori sempre piu' piccoli) e' innocua: tipico al
+    bordo freddo del plasma, quindi non avvisiamo. Sopra 200 keV invece
+    l'extrapolazione e' rischiosa e segnaliamo un avviso.
     """
     T = np.asarray(T_keV, dtype=np.float64)
-    if np.any((T < _T_MIN_KEV) | (T > _T_MAX_KEV)):
+    if np.any(T > _T_MAX_KEV):
         import warnings
 
         warnings.warn(
-            f"Temperatura fuori dal range di validita' "
-            f"[{_T_MIN_KEV}, {_T_MAX_KEV}] keV; risultato extrapolato.",
+            f"Temperatura sopra il range di validita' ({_T_MAX_KEV} keV); "
+            f"risultato extrapolato.",
             stacklevel=2,
         )
     return np.power(10.0, _spline()(np.log10(T)))

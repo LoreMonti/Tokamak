@@ -14,7 +14,8 @@ confinamento, produce più energia di quanta ne serva per restare caldo?
 
 - ✅ **Fase 1 — Modello 0D**: reattività D-T, bilancio di potenza, fattore di
   guadagno *Q* e criterio di Lawson.
-- ⏳ Fase 2 — Trasporto radiale 1D (in arrivo).
+- ✅ **Fase 2 — Trasporto radiale 1D**: equazione di diffusione del calore,
+  solver implicito a volumi finiti, profilo *T(r)* e *τ_E* emergente.
 - ⏳ Fase 3 — Vincoli ingegneristici (Greenwald, Troyon, divertore).
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
@@ -44,6 +45,22 @@ Il triplo prodotto `n·T·τ_E` richiesto per l'ignition ha un **minimo a ~14 ke
 Bremsstrahlung domina la fusione e l'ignition diventa impossibile a qualunque
 densità (la curva rossa diverge).
 
+### Trasporto radiale 1D
+
+![Profilo radiale](docs/radial_profile.png)
+
+Risolviamo l'equazione di diffusione del calore lungo il raggio minore con uno
+schema implicito a volumi finiti (sistema tridiagonale, algoritmo di Thomas):
+
+```
+(3/2) n ∂T/∂t = (1/r) ∂/∂r( r·nχ·∂T/∂r ) + S(r)
+```
+
+A differenza del modello 0D, il tempo di confinamento `τ_E` non è imposto ma
+**emerge** dal profilo calcolato, dalla diffusività `χ` e dalla geometria.
+Validazione numerica: confronto con la soluzione analitica parabolica (sorgente
+e `χ` costanti) e conservazione dell'energia a dominio isolato.
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -62,8 +79,9 @@ pip install -e ".[dev]"
 # Test (include validazioni fisiche)
 pytest
 
-# Genera il diagramma di Lawson
+# Genera il diagramma di Lawson e il profilo radiale 1D
 python notebooks/lawson_diagram.py
+python notebooks/radial_profile.py
 ```
 
 ```python

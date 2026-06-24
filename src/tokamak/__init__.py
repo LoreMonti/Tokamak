@@ -13,6 +13,7 @@ from .power_balance import (
     triple_product_ignition,
 )
 from .reactivity import reactivity_dt
+from .transport import TransportSolver1D
 
 __version__ = "0.1.0"
 
@@ -26,4 +27,5 @@ __all__ = [
     "heating_power_required",
     "fusion_gain_Q",
     "triple_product_ignition",
+    "TransportSolver1D",
 ]
