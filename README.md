@@ -24,6 +24,9 @@ confinamento, produce più energia di quanta ne serva per restare caldo?
 - ✅ **Fase 5 — Equilibrio di Grad-Shafranov (2D)**: solver ellittico a
   differenze finite (algebra sparsa + iterazione di Picard), superfici
   magnetiche annidate e shift di Shafranov.
+- ✅ **Fase 6 — Combustione auto-consistente**: evoluzione temporale accoppiata
+  di combustibile D-T, cenere di elio ed energia; accensione (ignition) e
+  avvelenamento da cenere (Z_eff).
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -115,6 +118,24 @@ Picard sul termine non lineare. Le curve di livello di `ψ` sono le superfici
 magnetiche annidate; l'asse magnetico risulta spostato verso l'esterno (shift di
 Shafranov). Validato contro una soluzione analitica polinomiale (Solov'ev).
 
+### Combustione auto-consistente
+
+![Combustione D-T](docs/burn_demo.png)
+
+Modello 0D dipendente dal tempo che evolve insieme combustibile, cenere ed
+energia:
+
+```
+dn_DT/dt = S_fuel − 2R      dn_He/dt = R − n_He/τ_p
+dU/dt    = P_α + P_ext − P_brem − U/τ_E
+```
+
+La demo mostra l'**accensione**: dopo lo spegnimento del riscaldamento esterno
+il self-heating delle alfa sostiene la combustione. Nel tempo il combustibile si
+consuma e la cenere di elio si accumula, alzando `Z_eff` e le perdite — un
+effetto che solo un modello dinamico cattura. Test di conservazione:
+`Δn_He = −½ Δn_DT` (un elio per reazione, due nuclei di combustibile consumati).
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -143,6 +164,7 @@ python notebooks/radial_profile.py
 python notebooks/operational_space.py
 python notebooks/control_demo.py
 python notebooks/flux_surfaces.py
+python notebooks/burn_demo.py
 ```
 
 ```python

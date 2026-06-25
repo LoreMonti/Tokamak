@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from .burn import BurnState, simulate_burn, z_effective
 from .control import PIDController, simulate_controlled
 from .engineering import (
     TokamakConfig,
@@ -47,4 +48,7 @@ __all__ = [
     "PIDController",
     "simulate_controlled",
     "GradShafranovSolver",
+    "simulate_burn",
+    "BurnState",
+    "z_effective",
 ]
