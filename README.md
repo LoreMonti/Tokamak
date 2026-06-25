@@ -37,6 +37,8 @@ confinamento, produce più energia di quanta ne serva per restare caldo?
   bilancio dell'inventario, TBR di autosufficienza e doubling time.
 - ✅ **Fase 11 — Emulatore ML**: surrogate model (processo gaussiano) addestrato
   sul solver di trasporto; predice τ_E e T₀ con speed-up ~75×.
+- ✅ **Fase 12 — Dashboard interattiva**: app Streamlit che integra tutte le fasi
+  con slider sui parametri macchina e aggiornamento dal vivo dei grafici.
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -234,6 +236,17 @@ python notebooks/vertical_control.py
 python notebooks/fuel_cycle_demo.py
 python notebooks/surrogate_demo.py   # genera un dataset col solver (lento la 1ª volta)
 ```
+
+### Dashboard interattiva
+
+```bash
+pip install -e ".[app]"     # aggiunge streamlit
+streamlit run dashboard.py  # apre l'app nel browser
+```
+
+L'app integra tutte le fasi: slider su corrente, campo, densità, χ, riscaldamento,
+TBR… con grafici (spazio operativo + ottimo, profilo radiale, combustione, ciclo
+del trizio) aggiornati dal vivo.
 
 ```python
 from tokamak import fusion_gain_Q
