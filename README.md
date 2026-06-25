@@ -27,6 +27,8 @@ confinamento, produce più energia di quanta ne serva per restare caldo?
 - ✅ **Fase 6 — Combustione auto-consistente**: evoluzione temporale accoppiata
   di combustibile D-T, cenere di elio ed energia; accensione (ignition) e
   avvelenamento da cenere (Z_eff).
+- ✅ **Fase 7 — Radiazione da impurità**: Z_eff da miscela, funzione di
+  raffreddamento (~Z³) e soglia di collasso radiativo per specie.
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -136,6 +138,19 @@ consuma e la cenere di elio si accumula, alzando `Z_eff` e le perdite — un
 effetto che solo un modello dinamico cattura. Test di conservazione:
 `Δn_He = −½ Δn_DT` (un elio per reazione, due nuclei di combustibile consumati).
 
+### Radiazione da impurità e collasso radiativo
+
+![Collasso radiativo](docs/radiative_collapse.png)
+
+Le impurità irraggiano per radiazione di linea, `P_line = n_e·n_z·L_z(T)`, con
+la funzione di raffreddamento che scala circa come `L_z ~ Z³`. Quando la
+radiazione supera il riscaldamento, la temperatura collassa. Il modello mostra
+che il tungsteno (Z=74) è tollerato solo a livello di **ppm**, mentre il
+carbonio fino a ~0.1% — il motivo per cui le impurità ad alto Z sono temute.
+
+> ⚠️ La funzione di raffreddamento `L_z(T)` qui è **schematica** (scaling Z³
+> calibrato, non dati ADAS): riproduce il fenomeno, non valori quantitativi.
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -165,6 +180,7 @@ python notebooks/operational_space.py
 python notebooks/control_demo.py
 python notebooks/flux_surfaces.py
 python notebooks/burn_demo.py
+python notebooks/radiative_collapse.py
 ```
 
 ```python

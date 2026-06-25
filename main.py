@@ -30,6 +30,7 @@ PHASES = {
     4: ("Controllo PID in retroazione", NOTEBOOKS / "control_demo.py"),
     5: ("Equilibrio di Grad-Shafranov (2D)", NOTEBOOKS / "flux_surfaces.py"),
     6: ("Combustione auto-consistente D-T", NOTEBOOKS / "burn_demo.py"),
+    7: ("Radiazione da impurità / collasso radiativo", NOTEBOOKS / "radiative_collapse.py"),
 }
 
 
@@ -62,7 +63,7 @@ def main(argv: list[str] | None = None) -> int:
         nargs="+",
         choices=sorted(PHASES),
         metavar="N",
-        help="esegue solo le fasi indicate (1-6)",
+        help="esegue solo le fasi indicate (1-7)",
     )
     args = parser.parse_args(argv)
 

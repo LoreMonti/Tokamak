@@ -23,6 +23,12 @@ from .power_balance import (
     stored_energy_density,
     triple_product_ignition,
 )
+from .radiation import (
+    cooling_function,
+    max_impurity_fraction,
+    total_radiated_power_density,
+    z_eff_from_fractions,
+)
 from .reactivity import reactivity_dt
 from .transport import TransportSolver1D
 
@@ -51,4 +57,8 @@ __all__ = [
     "simulate_burn",
     "BurnState",
     "z_effective",
+    "cooling_function",
+    "z_eff_from_fractions",
+    "total_radiated_power_density",
+    "max_impurity_fraction",
 ]
