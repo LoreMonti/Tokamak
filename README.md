@@ -47,9 +47,9 @@ validazione fisica** e una dashboard interattiva.
 ## Cosa c'è dentro (fasi)
 
 - ✅ **Fase 1 — Modello 0D**: reattività D-T, bilancio di potenza, fattore di
-  guadagno *Q* e criterio di Lawson.
+  guadagno $Q$ e criterio di Lawson.
 - ✅ **Fase 2 — Trasporto radiale 1D**: equazione di diffusione del calore,
-  solver implicito a volumi finiti, profilo *T(r)* e *τ_E* emergente.
+  solver implicito a volumi finiti, profilo $T(r)$ e $\tau_E$ emergente.
 - ✅ **Fase 3 — Vincoli ingegneristici**: densità di Greenwald, beta limit di
   Troyon, carico termico sul divertore, diagramma dello spazio operativo.
 - ✅ **Fase 4A — Controllo in retroazione**: regolatore PID (con saturazione e
@@ -60,9 +60,9 @@ validazione fisica** e una dashboard interattiva.
   magnetiche annidate e shift di Shafranov.
 - ✅ **Fase 6 — Combustione auto-consistente**: evoluzione temporale accoppiata
   di combustibile D-T, cenere di elio ed energia; accensione (ignition) e
-  avvelenamento da cenere (Z_eff).
-- ✅ **Fase 7 — Radiazione da impurità**: Z_eff da miscela, funzione di
-  raffreddamento (~Z³) e soglia di collasso radiativo per specie.
+  avvelenamento da cenere ($Z_\text{eff}$).
+- ✅ **Fase 7 — Radiazione da impurità**: $Z_\text{eff}$ da miscela, funzione di
+  raffreddamento ($\sim Z^3$) e soglia di collasso radiativo per specie.
 - ✅ **Fase 8 — Ottimizzazione del punto operativo**: massimizzazione vincolata
   (SLSQP) della potenza di fusione sotto i limiti di Greenwald e Troyon.
 - ✅ **Fase 9 — Controllo di stabilità verticale**: stabilizzazione PD del plasma
@@ -70,7 +70,7 @@ validazione fisica** e una dashboard interattiva.
 - ✅ **Fase 10 — Ciclo del combustibile**: consumo e breeding del trizio,
   bilancio dell'inventario, TBR di autosufficienza e doubling time.
 - ✅ **Fase 11 — Emulatore ML**: surrogate model (processo gaussiano) addestrato
-  sul solver di trasporto; predice τ_E e T₀ con speed-up ~75×.
+  sul solver di trasporto; predice $\tau_E$ e $T_0$ con speed-up ~75×.
 - ✅ **Fase 12 — Dashboard interattiva**: app Streamlit che integra tutte le fasi
   con slider sui parametri macchina e aggiornamento dal vivo dei grafici.
 - ✅ **Fase 4B — Kernel C++**: solutore tridiagonale di Thomas in C++ (pybind11)
@@ -85,22 +85,22 @@ D-T 50:50:
 
 | Termine | Significato | Scaling |
 |---|---|---|
-| `P_fus` | Potenza di fusione D-T → ⁴He + n | ∝ n²⟨σv⟩ |
-| `P_α` | Self-heating delle particelle alfa (resta confinato) | ≈ P_fus / 5 |
-| `P_brem` | Perdita per radiazione di Bremsstrahlung | ∝ n²√T |
-| `P_loss` | Perdita per trasporto, `W/τ_E` | ∝ nT/τ_E |
+| $P_\text{fus}$ | Potenza di fusione D-T $\to\ ^4\text{He} + n$ | $\propto n^2\langle\sigma v\rangle$ |
+| $P_\alpha$ | Self-heating delle particelle alfa (resta confinato) | $\approx P_\text{fus}/5$ |
+| $P_\text{brem}$ | Perdita per radiazione di Bremsstrahlung | $\propto n^2\sqrt{T}$ |
+| $P_\text{loss}$ | Perdita per trasporto, $W/\tau_E$ | $\propto nT/\tau_E$ |
 
-La **reattività** ⟨σv⟩(T) è calcolata come media maxwelliana della sezione
-d'urto di Bosch-Hale, validata contro i valori di letteratura (entro ~2% tra 1 e
-200 keV, picco a ~66 keV).
+La **reattività** $\langle\sigma v\rangle(T)$ è calcolata come media maxwelliana
+della sezione d'urto di Bosch-Hale, validata contro i valori di letteratura
+(entro ~2% tra 1 e 200 keV, picco a ~66 keV).
 
 ### Criterio di Lawson
 
 ![Diagramma di Lawson](docs/lawson_diagram.png)
 
-Il triplo prodotto `n·T·τ_E` richiesto per l'ignition ha un **minimo a ~14 keV**:
-è la finestra operativa ottimale del D-T. Sotto una temperatura minima il
-Bremsstrahlung domina la fusione e l'ignition diventa impossibile a qualunque
+Il triplo prodotto $n\,T\,\tau_E$ richiesto per l'ignition ha un **minimo a
+~14 keV**: è la finestra operativa ottimale del D-T. Sotto una temperatura minima
+il Bremsstrahlung domina la fusione e l'ignition diventa impossibile a qualunque
 densità (la curva rossa diverge).
 
 ### Trasporto radiale 1D
@@ -110,14 +110,12 @@ densità (la curva rossa diverge).
 Risolviamo l'equazione di diffusione del calore lungo il raggio minore con uno
 schema implicito a volumi finiti (sistema tridiagonale, algoritmo di Thomas):
 
-```
-(3/2) n ∂T/∂t = (1/r) ∂/∂r( r·nχ·∂T/∂r ) + S(r)
-```
+$$\frac{3}{2}n\frac{\partial T}{\partial t} = \frac{1}{r}\frac{\partial}{\partial r}\left(r\,n\chi\,\frac{\partial T}{\partial r}\right) + S(r)$$
 
-A differenza del modello 0D, il tempo di confinamento `τ_E` non è imposto ma
-**emerge** dal profilo calcolato, dalla diffusività `χ` e dalla geometria.
+A differenza del modello 0D, il tempo di confinamento $\tau_E$ non è imposto ma
+**emerge** dal profilo calcolato, dalla diffusività $\chi$ e dalla geometria.
 Validazione numerica: confronto con la soluzione analitica parabolica (sorgente
-e `χ` costanti) e conservazione dell'energia a dominio isolato.
+e $\chi$ costanti) e conservazione dell'energia a dominio isolato.
 
 ### Spazio operativo (vincoli ingegneristici)
 
@@ -127,9 +125,9 @@ Un reattore deve stare dentro tre limiti fisico-ingegneristici:
 
 | Limite | Formula | Cosa impedisce |
 |---|---|---|
-| Greenwald | `n_G = I_p / (π a²)` | disruption da densità eccessiva |
-| Troyon (beta) | `β_max[%] = β_N·I_p/(a·B_t)` | instabilità MHD da pressione eccessiva |
-| Divertore | `q = P_SOL / A_bagnata` | fusione dei materiali (~10 MW/m²) |
+| Greenwald | $n_G = I_p / (\pi a^2)$ | disruption da densità eccessiva |
+| Troyon (beta) | $\beta_\text{max}[\%] = \beta_N\,I_p/(a\,B_t)$ | instabilità MHD da pressione eccessiva |
+| Divertore | $q = P_\text{SOL} / A_\text{bagnata}$ | fusione dei materiali (~10 MW/m²) |
 
 La finestra operativa utile è la regione che soddisfa **tutti** i vincoli ed è
 sopra la curva di break-even — intorno a 10–15 keV per parametri tipo ITER.
@@ -138,16 +136,14 @@ sopra la curva di break-even — intorno a 10–15 keV per parametri tipo ITER.
 
 ![Controllo PID](docs/control_demo.png)
 
-Un regolatore PID regola la potenza di riscaldamento `P_ext` per mantenere la
-temperatura centrale a un target:
+Un regolatore PID regola la potenza di riscaldamento $P_\text{ext}$ per mantenere
+la temperatura centrale a un target:
 
-```
-P_ext(t) = Kp·e(t) + Ki·∫e dt + Kd·de/dt,   e = T_target − T
-```
+$$P_\text{ext}(t) = K_p\,e(t) + K_i\!\int e\,dt + K_d\,\frac{de}{dt}, \qquad e = T_\text{target} - T$$
 
-Con saturazione (`0 ≤ P_ext ≤ P_max`) e anti-windup, come ogni controllore
+Con saturazione ($0 \le P_\text{ext} \le P_\text{max}$) e anti-windup, come ogni controllore
 reale. La demo mostra la **reiezione del disturbo**: a metà simulazione il
-confinamento si degrada (χ raddoppia), la temperatura cala e il controllore
+confinamento si degrada ($\chi$ raddoppia), la temperatura cala e il controllore
 alza la potenza per riportarla al target.
 
 ### Equilibrio magnetico di Grad-Shafranov
@@ -155,16 +151,15 @@ alza la potenza per riportarla al target.
 ![Superfici di flusso](docs/flux_surfaces.png)
 
 Risolve l'equazione di equilibrio MHD assialsimmetrica per la funzione di flusso
-poloidale `ψ(R,Z)`:
+poloidale $\psi(R,Z)$:
 
-```
-Δ*ψ = −μ0 R² dp/dψ − F dF/dψ
-```
+$$\Delta^*\psi = -\mu_0 R^2\,\frac{dp}{d\psi} - F\frac{dF}{d\psi}$$
 
 con un solver ellittico a differenze finite (matrice sparsa) e iterazione di
 Picard sul termine non lineare. Il bordo del plasma è prescritto a forma di **D**
-(elongazione κ, triangolarità δ — ciò che fanno le bobine di sagomatura). Le
-curve di livello di `ψ` sono le superfici magnetiche annidate; l'asse magnetico
+(elongazione $\kappa$, triangolarità $\delta$ — ciò che fanno le bobine di
+sagomatura). Le curve di livello di $\psi$ sono le superfici magnetiche annidate;
+l'asse magnetico
 risulta spostato verso l'esterno (shift di Shafranov). Validato contro una
 soluzione analitica polinomiale (Solov'ev).
 
@@ -175,67 +170,68 @@ soluzione analitica polinomiale (Solov'ev).
 Modello 0D dipendente dal tempo che evolve insieme combustibile, cenere ed
 energia:
 
-```
-dn_DT/dt = S_fuel − 2R      dn_He/dt = R − n_He/τ_p
-dU/dt    = P_α + P_ext − P_brem − U/τ_E
-```
+$$\frac{dn_{DT}}{dt} = S_\text{fuel} - 2R, \qquad \frac{dn_{He}}{dt} = R - \frac{n_{He}}{\tau_p}, \qquad \frac{dU}{dt} = P_\alpha + P_\text{ext} - P_\text{brem} - \frac{U}{\tau_E}$$
 
 La demo mostra l'**accensione**: dopo lo spegnimento del riscaldamento esterno
 il self-heating delle alfa sostiene la combustione. Nel tempo il combustibile si
-consuma e la cenere di elio si accumula, alzando `Z_eff` e le perdite — un
+consuma e la cenere di elio si accumula, alzando $Z_\text{eff}$ e le perdite — un
 effetto che solo un modello dinamico cattura. Test di conservazione:
-`Δn_He = −½ Δn_DT` (un elio per reazione, due nuclei di combustibile consumati).
+$\Delta n_{He} = -\tfrac12\,\Delta n_{DT}$ (un elio per reazione, due nuclei di
+combustibile consumati).
 
 ### Radiazione da impurità e collasso radiativo
 
 ![Collasso radiativo](docs/radiative_collapse.png)
 
-Le impurità irraggiano per radiazione di linea, `P_line = n_e·n_z·L_z(T)`, con
-la funzione di raffreddamento che scala circa come `L_z ~ Z³`. Quando la
+Le impurità irraggiano per radiazione di linea, $P_\text{line} = n_e\,n_z\,L_z(T)$,
+con la funzione di raffreddamento che scala circa come $L_z \sim Z^3$. Quando la
 radiazione supera il riscaldamento, la temperatura collassa. Il modello mostra
-che il tungsteno (Z=74) è tollerato solo a livello di **ppm**, mentre il
-carbonio fino a ~0.1% — il motivo per cui le impurità ad alto Z sono temute.
+che il tungsteno ($Z=74$) è tollerato solo a livello di **ppm**, mentre il
+carbonio fino a ~0.1% — il motivo per cui le impurità ad alto $Z$ sono temute.
 
-> ⚠️ La funzione di raffreddamento `L_z(T)` qui è **schematica** (scaling Z³
+> ⚠️ La funzione di raffreddamento $L_z(T)$ qui è **schematica** (scaling $Z^3$
 > calibrato, non dati ADAS): riproduce il fenomeno, non valori quantitativi.
 
 ### Ottimizzazione del punto operativo
 
 ![Punto ottimo](docs/optimum_point.png)
 
-Massimizza la densità di potenza di fusione `P_fus(n,T)` sotto i vincoli di
+Massimizza la densità di potenza di fusione $P_\text{fus}(n,T)$ sotto i vincoli di
 Greenwald e Troyon (SLSQP). L'ottimo cade sul **bordo dei vincoli** — qui sul
-limite di Troyon a ~13.6 keV — perché `P_fus ∝ n²⟨σv⟩` cresce con densità e
-temperatura. È la sintesi quantitativa di fisica (fusione) e ingegneria (limiti).
+limite di Troyon a ~13.6 keV — perché $P_\text{fus} \propto n^2\langle\sigma v\rangle$
+cresce con densità e temperatura. È la sintesi quantitativa di fisica (fusione) e
+ingegneria (limiti).
 
 ### Controllo di stabilità verticale
 
 ![Controllo verticale](docs/vertical_control.png)
 
-I plasmi allungati (κ>1, forma a D) confinano meglio ma sono **verticalmente
-instabili** (pendolo inverso, `z̈ = γ²z + bu`). Senza controllo fuggono verso la
-parete in pochi ms; un controllore **PD** (lo stesso `PIDController` con kᵢ=0) li
-stabilizza se `b·kp > γ²`. La demo confronta anello aperto (fuga) e anello chiuso
-(stabilizzato + reiezione di un disturbo impulsivo).
+I plasmi allungati ($\kappa>1$, forma a D) confinano meglio ma sono
+**verticalmente instabili** (pendolo inverso, $\ddot z = \gamma^2 z + b\,u$).
+Senza controllo fuggono verso la parete in pochi ms; un controllore **PD** (lo
+stesso `PIDController` con $k_i=0$) li stabilizza se $b\,k_p > \gamma^2$. La demo
+confronta anello aperto (fuga) e anello chiuso (stabilizzato + reiezione di un
+disturbo impulsivo).
 
 ### Ciclo del combustibile (trizio)
 
 ![Ciclo del combustibile](docs/fuel_cycle.png)
 
 Il trizio non esiste in natura: va prodotto nel mantello di litio. Un reattore
-da ~3 GW ne brucia ~0.5 kg/giorno, quindi serve `TBR = prodotto/consumato > 1`
-per l'autosufficienza. Il bilancio `dN/dt = (TBR−1)·burn − λN + S` mostra che
-solo con TBR>1 l'inventario cresce; il doubling time (per avviare nuovi reattori)
-diverge quando TBR→1.
+da ~3 GW ne brucia ~0.5 kg/giorno, quindi serve $\text{TBR} = \text{prodotto}/\text{consumato} > 1$
+per l'autosufficienza. Il bilancio $dN/dt = (\text{TBR}-1)\,\dot N_\text{burn} - \lambda N + S$
+mostra che solo con TBR>1 l'inventario cresce; il doubling time (per avviare
+nuovi reattori) diverge quando TBR→1.
 
 ### Emulatore ML del solver (surrogate model)
 
 ![Emulatore](docs/surrogate.png)
 
 Un modello di machine learning (processo gaussiano) addestrato sui dati del
-solver 1D impara la mappa `(n_e, χ, P_ext) → (τ_E, T₀)` e la predice in
-millisecondi (speed-up **~75×**), con R² ≈ 0.9 su dati mai visti. È il pattern
-"physics + ML": un emulatore veloce per scan massicci o controllo in tempo
+solver 1D impara la mappa $(n_e, \chi, P_\text{ext}) \to (\tau_E, T_0)$ e la
+predice in millisecondi (speed-up **~75×**), con $R^2 \approx 0.9$ su dati mai
+visti. È il pattern "physics + ML": un emulatore veloce per scan massicci o
+controllo in tempo
 reale. Gli scostamenti maggiori sono nei rari casi vicini all'ignition (mappa
 molto ripida).
 
@@ -266,8 +262,8 @@ python notebooks/cpp_benchmark.py
 
 | Grandezza | Modello | Riferimento |
 |---|---|---|
-| ⟨σv⟩ a 10 keV | 1.14e-22 m³/s | ~1.1e-22 m³/s |
-| Picco di ⟨σv⟩ | 66 keV | ~64 keV |
+| $\langle\sigma v\rangle$ a 10 keV | 1.14e-22 m³/s | ~1.1e-22 m³/s |
+| Picco di $\langle\sigma v\rangle$ | 66 keV | ~64 keV |
 | Minimo del triplo prodotto | 14.4 keV | ~14 keV |
 | Frazione alfa | 0.200 | 3.52/17.59 = 0.200 |
 
@@ -305,8 +301,9 @@ pip install -e ".[app]"     # aggiunge streamlit
 streamlit run dashboard.py  # apre l'app nel browser
 ```
 
-L'app integra tutte le fasi: slider su corrente, campo, densità, χ, riscaldamento,
-TBR… con grafici (spazio operativo + ottimo, profilo radiale, combustione, ciclo
+L'app integra tutte le fasi: slider su corrente, campo, densità, $\chi$,
+riscaldamento, TBR… con grafici (spazio operativo + ottimo, profilo radiale,
+combustione, ciclo
 del trizio) aggiornati dal vivo.
 
 <!-- Suggerimento: cattura uno screenshot dell'app e salvalo come
@@ -354,4 +351,4 @@ Tokamak/
 
 ## Licenza
 
-MIT
+Distribuito sotto licenza MIT — vedi [LICENSE](LICENSE).
