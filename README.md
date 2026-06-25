@@ -31,6 +31,8 @@ confinamento, produce più energia di quanta ne serva per restare caldo?
   raffreddamento (~Z³) e soglia di collasso radiativo per specie.
 - ✅ **Fase 8 — Ottimizzazione del punto operativo**: massimizzazione vincolata
   (SLSQP) della potenza di fusione sotto i limiti di Greenwald e Troyon.
+- ✅ **Fase 9 — Controllo di stabilità verticale**: stabilizzazione PD del plasma
+  allungato (verticalmente instabile), con reiezione del disturbo.
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -162,6 +164,16 @@ Greenwald e Troyon (SLSQP). L'ottimo cade sul **bordo dei vincoli** — qui sul
 limite di Troyon a ~13.6 keV — perché `P_fus ∝ n²⟨σv⟩` cresce con densità e
 temperatura. È la sintesi quantitativa di fisica (fusione) e ingegneria (limiti).
 
+### Controllo di stabilità verticale
+
+![Controllo verticale](docs/vertical_control.png)
+
+I plasmi allungati (κ>1, forma a D) confinano meglio ma sono **verticalmente
+instabili** (pendolo inverso, `z̈ = γ²z + bu`). Senza controllo fuggono verso la
+parete in pochi ms; un controllore **PD** (lo stesso `PIDController` con kᵢ=0) li
+stabilizza se `b·kp > γ²`. La demo confronta anello aperto (fuga) e anello chiuso
+(stabilizzato + reiezione di un disturbo impulsivo).
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -193,6 +205,7 @@ python notebooks/flux_surfaces.py
 python notebooks/burn_demo.py
 python notebooks/radiative_collapse.py
 python notebooks/optimum_demo.py
+python notebooks/vertical_control.py
 ```
 
 ```python

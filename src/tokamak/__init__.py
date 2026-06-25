@@ -31,6 +31,11 @@ from .radiation import (
     z_eff_from_fractions,
 )
 from .reactivity import reactivity_dt
+from .stability import (
+    closed_loop_is_stable,
+    simulate_vertical_control,
+    vertical_growth_rate,
+)
 from .transport import TransportSolver1D
 
 __version__ = "0.1.0"
@@ -64,4 +69,7 @@ __all__ = [
     "max_impurity_fraction",
     "optimize_operating_point",
     "OptimalPoint",
+    "vertical_growth_rate",
+    "closed_loop_is_stable",
+    "simulate_vertical_control",
 ]
