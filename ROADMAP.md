@@ -143,6 +143,112 @@ Per chi vuole spingere su control engineering / HPC.
 
 ---
 
+# Parte II — Estensioni (fasi 5–12)
+
+> **Stato:** le fasi 0–3 e 4A (controllo PID) sono completate. Questa seconda
+> parte trasforma la raccolta di moduli in un **simulatore integrato e
+> auto-consistente**, con un ordine guidato dalle DIPENDENZE tra i moduli (non
+> filone per filone): un modulo si fa quando quelli da cui dipende sono pronti.
+
+Ordine complessivo: **5 → 6 → 7 → 8 → 9 → 10 → 11 → 12**, con la 4B (kernel C++)
+inseribile in qualsiasi momento perché ortogonale al resto.
+
+## Fase 5 — Equilibrio magnetico di Grad-Shafranov (2D)
+
+Il pezzo "iconico" della fisica del plasma: le superfici di flusso a forma di D.
+
+- [ ] Risolvere l'equazione di Grad-Shafranov (PDE ellittica 2D nella sezione
+      poloidale R-Z): `Δ*ψ = -μ0 R² dp/dψ - F dF/dψ`
+- [ ] Profili sorgente `p(ψ)` e `FF'(ψ)` parametrizzati
+- [ ] Solver: differenze finite + iterazione di punto fisso (Picard) sul termine
+      non lineare di destra
+- [ ] Visualizzazione delle superfici di flusso annidate + ultima superficie chiusa
+- [ ] Validazione: confronto con la soluzione analitica di Solov'ev
+
+**Dipendenze:** nessuna (modulo autonomo). **Sblocca:** Fase 9 (controllo forma).
+**Commit:** `feat: 2D Grad-Shafranov equilibrium solver`
+
+## Fase 6 — Combustione auto-consistente (burn dynamics)
+
+Chiude il bilancio: oggi `τ_E` emerge ma fuel e cenere sono statici.
+
+- [ ] Evoluzione accoppiata di temperatura, densità di combustibile D-T e
+      densità di cenere di elio (He-4 prodotto dalle reazioni)
+- [ ] Consumo del combustibile (burn-up) e accumulo di cenere che diluisce il plasma
+- [ ] Sorgente di rifornimento (fueling) e tempo di confinamento delle particelle
+- [ ] Dinamica di accensione: dimostrare l'ignition come stato auto-sostenuto
+- [ ] Validazione: conservazione del numero di particelle, stato stazionario coerente
+
+**Dipendenze:** Fasi 1–2. **Sblocca:** Fasi 8, 11.
+**Commit:** `feat: self-consistent D-T burn with helium ash`
+
+## Fase 7 — Radiazione da impurità e Z_eff
+
+- [ ] Modello di radiazione di linea da impurità (es. funzione di raffreddamento)
+- [ ] Calcolo di `Z_eff` da una miscela di impurità data
+- [ ] Effetto sul bilancio di potenza e possibile collasso radiativo
+
+**Dipendenze:** Fase 6. **Commit:** `feat: impurity radiation and Z_eff`
+
+## Fase 8 — Ottimizzazione del punto operativo
+
+Lega insieme fisica e vincoli in un unico risultato.
+
+- [ ] Funzione obiettivo: massimizzare Q (o densità di potenza di fusione)
+- [ ] Vincoli: limiti di Greenwald, Troyon e divertore (Fase 3)
+- [ ] Ottimizzatore con vincoli (`scipy.optimize`, eventualmente globale)
+- [ ] Mappa del punto operativo ottimo sul diagramma dello spazio operativo
+
+**Dipendenze:** Fasi 3, 6. **Commit:** `feat: constrained operating-point optimization`
+
+## Fase 9 — Controllo di forma e posizione del plasma
+
+Estende il PID della 4A al problema (instabile!) della posizione verticale.
+
+- [ ] Modello ridotto della dinamica verticale del plasma (instabilità intrinseca)
+- [ ] Controllore di stabilizzazione su correnti delle bobine di campo poloidale
+- [ ] Uso dell'equilibrio di Grad-Shafranov per definire la forma di riferimento
+
+**Dipendenze:** Fasi 4A, 5. **Commit:** `feat: vertical position/shape control`
+
+## Fase 10 — Ciclo del combustibile e tritium breeding
+
+- [ ] Bilancio del trizio: produzione nel mantello (breeding ratio) vs consumo
+- [ ] Inventario di trizio e condizione di autosufficienza (TBR > 1)
+- [ ] Collegamento con la potenza neutronica del modello (Fase 1)
+
+**Dipendenze:** Fase 1. **Commit:** `feat: tritium fuel cycle and breeding`
+
+## Fase 11 — Emulatore ML del solver (surrogate model)
+
+Fisica + machine learning: predire i risultati del solver, ma ~1000× più veloce.
+
+- [ ] Generare un dataset campionando i parametri ed eseguendo il solver 1D/burn
+- [ ] Addestrare un modello (rete neurale o gradient boosting) a predire
+      `T(r)`, `τ_E` o Q dai parametri di input
+- [ ] Validare accuratezza e speed-up; usarlo per scan/ottimizzazione rapidi
+
+**Dipendenze:** Fase 6. **Commit:** `feat: ML surrogate model of the transport solver`
+
+## Fase 12 — Dashboard interattiva (capstone)
+
+- [ ] App (Streamlit/Plotly) per esplorare dal vivo spazio operativo, profili,
+      transitori controllati ed equilibrio
+- [ ] Slider sui parametri macchina con aggiornamento in tempo reale (via emulatore)
+
+**Dipendenze:** tutte. **Commit:** `feat: interactive exploration dashboard`
+
+## Fase 4B — Kernel C++ ad alte prestazioni (inseribile quando si vuole)
+
+- [ ] Riscrivere il solver tridiagonale 1D in C++, esposto con **pybind11**
+- [ ] Validazione numerica contro la versione Python (stessi risultati)
+- [ ] Benchmark Python vs C++ documentato nel README
+- [ ] Integrazione nella build e nella CI
+
+**Dipendenze:** Fase 2. **Commit:** `perf: C++ tridiagonal kernel via pybind11`
+
+---
+
 ## Standard di qualità (trasversali — è ciò che impressiona i recruiter)
 
 - ✅ **Test fisici significativi**, non solo unitari: conservazione, limiti noti,
