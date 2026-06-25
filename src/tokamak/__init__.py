@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+from .engineering import (
+    TokamakConfig,
+    check_operational_limits,
+    greenwald_density,
+    greenwald_fraction,
+    plasma_beta,
+    troyon_beta_limit,
+)
 from .power_balance import (
     alpha_power_density,
     bremsstrahlung_power_density,
@@ -28,4 +36,10 @@ __all__ = [
     "fusion_gain_Q",
     "triple_product_ignition",
     "TransportSolver1D",
+    "TokamakConfig",
+    "check_operational_limits",
+    "greenwald_density",
+    "greenwald_fraction",
+    "plasma_beta",
+    "troyon_beta_limit",
 ]

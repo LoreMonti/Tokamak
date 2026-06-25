@@ -16,7 +16,8 @@ confinamento, produce più energia di quanta ne serva per restare caldo?
   guadagno *Q* e criterio di Lawson.
 - ✅ **Fase 2 — Trasporto radiale 1D**: equazione di diffusione del calore,
   solver implicito a volumi finiti, profilo *T(r)* e *τ_E* emergente.
-- ⏳ Fase 3 — Vincoli ingegneristici (Greenwald, Troyon, divertore).
+- ✅ **Fase 3 — Vincoli ingegneristici**: densità di Greenwald, beta limit di
+  Troyon, carico termico sul divertore, diagramma dello spazio operativo.
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -61,6 +62,21 @@ A differenza del modello 0D, il tempo di confinamento `τ_E` non è imposto ma
 Validazione numerica: confronto con la soluzione analitica parabolica (sorgente
 e `χ` costanti) e conservazione dell'energia a dominio isolato.
 
+### Spazio operativo (vincoli ingegneristici)
+
+![Spazio operativo](docs/operational_space.png)
+
+Un reattore deve stare dentro tre limiti fisico-ingegneristici:
+
+| Limite | Formula | Cosa impedisce |
+|---|---|---|
+| Greenwald | `n_G = I_p / (π a²)` | disruption da densità eccessiva |
+| Troyon (beta) | `β_max[%] = β_N·I_p/(a·B_t)` | instabilità MHD da pressione eccessiva |
+| Divertore | `q = P_SOL / A_bagnata` | fusione dei materiali (~10 MW/m²) |
+
+La finestra operativa utile è la regione che soddisfa **tutti** i vincoli ed è
+sopra la curva di break-even — intorno a 10–15 keV per parametri tipo ITER.
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -79,9 +95,10 @@ pip install -e ".[dev]"
 # Test (include validazioni fisiche)
 pytest
 
-# Genera il diagramma di Lawson e il profilo radiale 1D
+# Genera i diagrammi: Lawson, profilo radiale 1D, spazio operativo
 python notebooks/lawson_diagram.py
 python notebooks/radial_profile.py
+python notebooks/operational_space.py
 ```
 
 ```python
