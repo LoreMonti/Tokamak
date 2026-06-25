@@ -29,6 +29,8 @@ confinamento, produce più energia di quanta ne serva per restare caldo?
   avvelenamento da cenere (Z_eff).
 - ✅ **Fase 7 — Radiazione da impurità**: Z_eff da miscela, funzione di
   raffreddamento (~Z³) e soglia di collasso radiativo per specie.
+- ✅ **Fase 8 — Ottimizzazione del punto operativo**: massimizzazione vincolata
+  (SLSQP) della potenza di fusione sotto i limiti di Greenwald e Troyon.
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -151,6 +153,15 @@ carbonio fino a ~0.1% — il motivo per cui le impurità ad alto Z sono temute.
 > ⚠️ La funzione di raffreddamento `L_z(T)` qui è **schematica** (scaling Z³
 > calibrato, non dati ADAS): riproduce il fenomeno, non valori quantitativi.
 
+### Ottimizzazione del punto operativo
+
+![Punto ottimo](docs/optimum_point.png)
+
+Massimizza la densità di potenza di fusione `P_fus(n,T)` sotto i vincoli di
+Greenwald e Troyon (SLSQP). L'ottimo cade sul **bordo dei vincoli** — qui sul
+limite di Troyon a ~13.6 keV — perché `P_fus ∝ n²⟨σv⟩` cresce con densità e
+temperatura. È la sintesi quantitativa di fisica (fusione) e ingegneria (limiti).
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -181,6 +192,7 @@ python notebooks/control_demo.py
 python notebooks/flux_surfaces.py
 python notebooks/burn_demo.py
 python notebooks/radiative_collapse.py
+python notebooks/optimum_demo.py
 ```
 
 ```python

@@ -13,6 +13,7 @@ from .engineering import (
     troyon_beta_limit,
 )
 from .equilibrium import GradShafranovSolver
+from .optimization import OptimalPoint, optimize_operating_point
 from .power_balance import (
     alpha_power_density,
     bremsstrahlung_power_density,
@@ -61,4 +62,6 @@ __all__ = [
     "z_eff_from_fractions",
     "total_radiated_power_density",
     "max_impurity_fraction",
+    "optimize_operating_point",
+    "OptimalPoint",
 ]
