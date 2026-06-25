@@ -55,6 +55,9 @@ class GradShafranovSolver:
     RR: NDArray[np.float64] = field(init=False)
     ZZ: NDArray[np.float64] = field(init=False)
     psi: NDArray[np.float64] = field(init=False)
+    # Nodi di Dirichlet (psi imposta): bordo griglia ed eventuale esterno del
+    # plasma quando si prescrive un bordo sagomato (es. forma a D).
+    _fixed: NDArray[np.bool_] = field(init=False)
     _A: csr_matrix = field(init=False)
 
     def __post_init__(self) -> None:
@@ -63,6 +66,40 @@ class GradShafranovSolver:
         # Indici: RR varia lungo le righe (R), ZZ lungo le colonne (Z).
         self.RR, self.ZZ = np.meshgrid(self.R, self.Z, indexing="ij")
         self.psi = np.zeros((self.nR, self.nZ))
+        # Default: Dirichlet solo sul bordo rettangolare della griglia.
+        self._fixed = self._grid_edge_mask()
+        self._A = self._build_operator()
+
+    def _grid_edge_mask(self) -> NDArray[np.bool_]:
+        mask = np.zeros((self.nR, self.nZ), dtype=bool)
+        mask[0, :] = mask[-1, :] = mask[:, 0] = mask[:, -1] = True
+        return mask
+
+    def set_d_shaped_boundary(
+        self, R0: float, a: float, kappa: float, delta: float, n_boundary: int = 400
+    ) -> None:
+        """Prescrive un bordo del plasma a forma di "D" (psi=0 su di esso).
+
+        La forma e' parametrizzata in modo standard da elongazione kappa e
+        triangolarita' delta:
+
+            R(t) = R0 + a cos(t + delta sin t),   Z(t) = kappa a sin t
+
+        Fisicamente e' cio' che fanno le bobine di sagomatura: la forma del
+        plasma e' un INPUT ingegneristico, non emerge da sola. I nodi della
+        griglia esterni alla D diventano nodi di Dirichlet (psi=0); l'operatore
+        viene riassemblato di conseguenza.
+        """
+        from matplotlib.path import Path
+
+        t = np.linspace(0.0, 2.0 * np.pi, n_boundary)
+        Rb = R0 + a * np.cos(t + delta * np.sin(t))
+        Zb = kappa * a * np.sin(t)
+        polygon = Path(np.column_stack([Rb, Zb]))
+        pts = np.column_stack([self.RR.ravel(), self.ZZ.ravel()])
+        inside = polygon.contains_points(pts).reshape(self.nR, self.nZ)
+        # Dirichlet ovunque tranne all'interno della D (e mai sul bordo griglia).
+        self._fixed = self._grid_edge_mask() | ~inside
         self._A = self._build_operator()
 
     # --- Costruzione dell'operatore Delta* (matrice sparsa) ----------------
@@ -83,8 +120,9 @@ class GradShafranovSolver:
         for i in range(nR):
             for j in range(nZ):
                 k = idx(i, j)
-                # Bordo: Dirichlet -> riga identita'.
-                if i == 0 or i == nR - 1 or j == 0 or j == nZ - 1:
+                # Nodo di Dirichlet (bordo griglia o esterno del plasma) ->
+                # riga identita'.
+                if self._fixed[i, j]:
                     rows.append(k)
                     cols.append(k)
                     data.append(1.0)
@@ -127,11 +165,9 @@ class GradShafranovSolver:
             if np.isscalar(boundary)
             else np.asarray(boundary)
         )
-        # Sovrascrive i nodi di bordo col valore di Dirichlet.
-        mask = np.zeros((nR, nZ), dtype=bool)
-        mask[0, :] = mask[-1, :] = mask[:, 0] = mask[:, -1] = True
+        # Sovrascrive i nodi di Dirichlet col valore al bordo.
         b_grid = b.reshape(nR, nZ)
-        b_grid[mask] = bnd[mask]
+        b_grid[self._fixed] = bnd[self._fixed]
 
         psi = spsolve(self._A, b_grid.reshape(-1))
         self.psi = psi.reshape(nR, nZ)
@@ -159,6 +195,7 @@ class GradShafranovSolver:
         guess = np.clip(
             1.0 - ((self.RR - Rmid) / aR) ** 2 - ((self.ZZ - Zmid) / aZ) ** 2, 0.0, None
         )
+        guess[self._fixed] = 0.0  # nullo fuori dal plasma (e sul bordo griglia)
         self.psi = guess
 
         for it in range(1, max_iter + 1):

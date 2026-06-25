@@ -126,9 +126,11 @@ poloidale `ψ(R,Z)`:
 ```
 
 con un solver ellittico a differenze finite (matrice sparsa) e iterazione di
-Picard sul termine non lineare. Le curve di livello di `ψ` sono le superfici
-magnetiche annidate; l'asse magnetico risulta spostato verso l'esterno (shift di
-Shafranov). Validato contro una soluzione analitica polinomiale (Solov'ev).
+Picard sul termine non lineare. Il bordo del plasma è prescritto a forma di **D**
+(elongazione κ, triangolarità δ — ciò che fanno le bobine di sagomatura). Le
+curve di livello di `ψ` sono le superfici magnetiche annidate; l'asse magnetico
+risulta spostato verso l'esterno (shift di Shafranov). Validato contro una
+soluzione analitica polinomiale (Solov'ev).
 
 ### Combustione auto-consistente
 

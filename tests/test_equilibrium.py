@@ -56,6 +56,31 @@ def test_picard_converges_and_produces_peaked_psi():
     assert abs(Z_ax) < 1.0  # asse vicino al piano mediano per simmetria
 
 
+def test_d_shaped_boundary_gives_elongated_plasma():
+    """Con un bordo a D (kappa>1), il plasma e' nullo fuori dalla D e la regione
+    con psi>0 e' piu' estesa in Z che in R (elongazione)."""
+    solver = GradShafranovSolver(
+        R_min=3.8, R_max=8.6, Z_min=-3.6, Z_max=3.6, nR=71, nZ=101
+    )
+    kappa = 1.8
+    solver.set_d_shaped_boundary(R0=6.2, a=2.0, kappa=kappa, delta=0.3)
+
+    def rhs(psi, RR):
+        psi_n = np.clip(psi / (np.max(psi) + 1e-30), 0.0, None)
+        return -120.0 * (0.7 * (RR / 6.2) ** 2 + 0.3) * (1.0 + 1.5 * psi_n)
+
+    solver.solve_picard(rhs, max_iter=200, tol=1e-7, relax=0.4)
+
+    # Fuori dalla D (nodi fissati) psi e' esattamente nullo.
+    assert np.allclose(solver.psi[solver._fixed], 0.0, atol=1e-9)
+
+    # La regione di plasma (psi>0) e' elongata verticalmente.
+    plasma = solver.psi > 0.05 * solver.psi.max()
+    R_extent = np.ptp(solver.RR[plasma])
+    Z_extent = np.ptp(solver.ZZ[plasma])
+    assert Z_extent / R_extent > 1.3  # riflette kappa > 1
+
+
 def test_boundary_condition_is_enforced():
     """Con sorgente nulla e bordo nullo, psi deve essere identicamente zero."""
     solver = GradShafranovSolver(

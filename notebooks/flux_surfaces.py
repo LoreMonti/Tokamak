@@ -21,9 +21,14 @@ DOCS = Path(__file__).resolve().parent.parent / "docs"
 
 def main() -> None:
     R0 = 6.2  # raggio maggiore [m]
+    a = 2.0   # raggio minore [m]
+    kappa = 1.7  # elongazione (forma a D)
+    delta = 0.33  # triangolarita'
     solver = GradShafranovSolver(
-        R_min=4.0, R_max=8.6, Z_min=-3.2, Z_max=3.2, nR=97, nZ=145
+        R_min=3.6, R_max=8.8, Z_min=-3.8, Z_max=3.8, nR=121, nZ=181
     )
+    # Bordo del plasma a forma di D (imposto dalle bobine di sagomatura).
+    solver.set_d_shaped_boundary(R0=R0, a=a, kappa=kappa, delta=delta)
 
     def rhs(psi, RR):
         # Termine di destra di Grad-Shafranov tipo Solov'ev: una parte COSTANTE
@@ -35,11 +40,11 @@ def main() -> None:
 
     iters = solver.solve_picard(rhs, max_iter=300, tol=1e-8, relax=0.4)
     R_ax, Z_ax, psi_ax = solver.magnetic_axis()
-    R_geo = 0.5 * (solver.R_min + solver.R_max)
 
+    print(f"Forma a D: kappa={kappa}, delta={delta}")
     print(f"Picard convergente in {iters} iterazioni")
     print(f"Asse magnetico: R = {R_ax:.2f} m, Z = {Z_ax:.2f} m")
-    print(f"Shift di Shafranov (asse oltre il centro): {R_ax - R_geo:+.2f} m")
+    print(f"Shift di Shafranov (asse oltre R0): {R_ax - R0:+.2f} m")
 
     fig, ax = plt.subplots(figsize=(6.2, 8))
     levels = np.linspace(0.02 * psi_ax, psi_ax, 14)
