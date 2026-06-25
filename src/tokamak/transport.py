@@ -167,6 +167,22 @@ class TransportSolver1D:
         """Volume totale del plasma [m^3] (~ 2 pi^2 R0 a^2)."""
         return float(np.sum(self._volume_element()))
 
+    def heating_density_for_power(
+        self, total_power_W: float, shape: NDArray[np.float64]
+    ) -> NDArray[np.float64]:
+        """Profilo di densita' di potenza [W/m^3] con forma `shape` data, tale
+        che la potenza totale iniettata nel volume sia esattamente total_power_W.
+
+        Serve al controllo: l'attuatore comanda una POTENZA (scalare), che qui
+        viene distribuita radialmente secondo una forma fissa (es. gaussiana
+        centrale) e normalizzata sul volume.
+        """
+        dV = self._volume_element()
+        norm = float(np.sum(shape * dV))
+        if norm <= 0.0:  # pragma: no cover
+            raise ValueError("la forma di deposizione ha integrale di volume nullo")
+        return total_power_W * shape / norm
+
     def stored_energy(self) -> float:
         """Energia termica totale immagazzinata W = integral (3 n T) dV [J]."""
         w_density = stored_energy_density(self.n_e, self.T)  # J/m^3

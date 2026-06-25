@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from .control import PIDController, simulate_controlled
 from .engineering import (
     TokamakConfig,
     check_operational_limits,
@@ -42,4 +43,6 @@ __all__ = [
     "greenwald_fraction",
     "plasma_beta",
     "troyon_beta_limit",
+    "PIDController",
+    "simulate_controlled",
 ]

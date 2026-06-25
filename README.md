@@ -18,6 +18,9 @@ confinamento, produce più energia di quanta ne serva per restare caldo?
   solver implicito a volumi finiti, profilo *T(r)* e *τ_E* emergente.
 - ✅ **Fase 3 — Vincoli ingegneristici**: densità di Greenwald, beta limit di
   Troyon, carico termico sul divertore, diagramma dello spazio operativo.
+- ✅ **Fase 4A — Controllo in retroazione**: regolatore PID (con saturazione e
+  anti-windup) che regola il riscaldamento per mantenere la temperatura al
+  target, con reiezione del disturbo di confinamento.
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -77,6 +80,22 @@ Un reattore deve stare dentro tre limiti fisico-ingegneristici:
 La finestra operativa utile è la regione che soddisfa **tutti** i vincoli ed è
 sopra la curva di break-even — intorno a 10–15 keV per parametri tipo ITER.
 
+### Controllo in retroazione (PID)
+
+![Controllo PID](docs/control_demo.png)
+
+Un regolatore PID regola la potenza di riscaldamento `P_ext` per mantenere la
+temperatura centrale a un target:
+
+```
+P_ext(t) = Kp·e(t) + Ki·∫e dt + Kd·de/dt,   e = T_target − T
+```
+
+Con saturazione (`0 ≤ P_ext ≤ P_max`) e anti-windup, come ogni controllore
+reale. La demo mostra la **reiezione del disturbo**: a metà simulazione il
+confinamento si degrada (χ raddoppia), la temperatura cala e il controllore
+alza la potenza per riportarla al target.
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -99,6 +118,7 @@ pytest
 python notebooks/lawson_diagram.py
 python notebooks/radial_profile.py
 python notebooks/operational_space.py
+python notebooks/control_demo.py
 ```
 
 ```python
