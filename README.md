@@ -21,6 +21,9 @@ confinamento, produce più energia di quanta ne serva per restare caldo?
 - ✅ **Fase 4A — Controllo in retroazione**: regolatore PID (con saturazione e
   anti-windup) che regola il riscaldamento per mantenere la temperatura al
   target, con reiezione del disturbo di confinamento.
+- ✅ **Fase 5 — Equilibrio di Grad-Shafranov (2D)**: solver ellittico a
+  differenze finite (algebra sparsa + iterazione di Picard), superfici
+  magnetiche annidate e shift di Shafranov.
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -96,6 +99,22 @@ reale. La demo mostra la **reiezione del disturbo**: a metà simulazione il
 confinamento si degrada (χ raddoppia), la temperatura cala e il controllore
 alza la potenza per riportarla al target.
 
+### Equilibrio magnetico di Grad-Shafranov
+
+![Superfici di flusso](docs/flux_surfaces.png)
+
+Risolve l'equazione di equilibrio MHD assialsimmetrica per la funzione di flusso
+poloidale `ψ(R,Z)`:
+
+```
+Δ*ψ = −μ0 R² dp/dψ − F dF/dψ
+```
+
+con un solver ellittico a differenze finite (matrice sparsa) e iterazione di
+Picard sul termine non lineare. Le curve di livello di `ψ` sono le superfici
+magnetiche annidate; l'asse magnetico risulta spostato verso l'esterno (shift di
+Shafranov). Validato contro una soluzione analitica polinomiale (Solov'ev).
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -123,6 +142,7 @@ python notebooks/lawson_diagram.py
 python notebooks/radial_profile.py
 python notebooks/operational_space.py
 python notebooks/control_demo.py
+python notebooks/flux_surfaces.py
 ```
 
 ```python

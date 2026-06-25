@@ -11,6 +11,7 @@ from .engineering import (
     plasma_beta,
     troyon_beta_limit,
 )
+from .equilibrium import GradShafranovSolver
 from .power_balance import (
     alpha_power_density,
     bremsstrahlung_power_density,
@@ -45,4 +46,5 @@ __all__ = [
     "troyon_beta_limit",
     "PIDController",
     "simulate_controlled",
+    "GradShafranovSolver",
 ]
