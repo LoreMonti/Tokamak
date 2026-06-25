@@ -111,10 +111,14 @@ alza la potenza per riportarla al target.
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
-# Test (include validazioni fisiche)
-pytest
+# Punto d'ingresso unico: esegue tutte le fasi (e, con --test, anche i test)
+python main.py --test       # test + tutte e 4 le fasi
+python main.py              # solo le 4 fasi (genera le figure in docs/)
+python main.py --phase 1 4  # solo le fasi indicate
+python main.py --only-test  # solo i test
 
-# Genera i diagrammi: Lawson, profilo radiale 1D, spazio operativo
+# In alternativa, i singoli script:
+pytest
 python notebooks/lawson_diagram.py
 python notebooks/radial_profile.py
 python notebooks/operational_space.py
