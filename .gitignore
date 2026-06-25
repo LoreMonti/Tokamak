@@ -26,3 +26,4 @@ env/
 
 # Generated figures (keep curated ones in docs/ tracked explicitly)
 *.tmp.png
+data/

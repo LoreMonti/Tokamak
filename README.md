@@ -35,6 +35,8 @@ confinamento, produce più energia di quanta ne serva per restare caldo?
   allungato (verticalmente instabile), con reiezione del disturbo.
 - ✅ **Fase 10 — Ciclo del combustibile**: consumo e breeding del trizio,
   bilancio dell'inventario, TBR di autosufficienza e doubling time.
+- ✅ **Fase 11 — Emulatore ML**: surrogate model (processo gaussiano) addestrato
+  sul solver di trasporto; predice τ_E e T₀ con speed-up ~75×.
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -186,6 +188,17 @@ per l'autosufficienza. Il bilancio `dN/dt = (TBR−1)·burn − λN + S` mostra 
 solo con TBR>1 l'inventario cresce; il doubling time (per avviare nuovi reattori)
 diverge quando TBR→1.
 
+### Emulatore ML del solver (surrogate model)
+
+![Emulatore](docs/surrogate.png)
+
+Un modello di machine learning (processo gaussiano) addestrato sui dati del
+solver 1D impara la mappa `(n_e, χ, P_ext) → (τ_E, T₀)` e la predice in
+millisecondi (speed-up **~75×**), con R² ≈ 0.9 su dati mai visti. È il pattern
+"physics + ML": un emulatore veloce per scan massicci o controllo in tempo
+reale. Gli scostamenti maggiori sono nei rari casi vicini all'ignition (mappa
+molto ripida).
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -219,6 +232,7 @@ python notebooks/radiative_collapse.py
 python notebooks/optimum_demo.py
 python notebooks/vertical_control.py
 python notebooks/fuel_cycle_demo.py
+python notebooks/surrogate_demo.py   # genera un dataset col solver (lento la 1ª volta)
 ```
 
 ```python

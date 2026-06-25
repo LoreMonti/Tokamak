@@ -42,6 +42,7 @@ from .stability import (
     simulate_vertical_control,
     vertical_growth_rate,
 )
+from .surrogate import generate_dataset, r2_per_target, train_surrogate
 from .transport import TransportSolver1D
 
 __version__ = "0.1.0"
@@ -82,4 +83,7 @@ __all__ = [
     "required_TBR",
     "doubling_time_years",
     "simulate_inventory",
+    "generate_dataset",
+    "train_surrogate",
+    "r2_per_target",
 ]
