@@ -39,6 +39,8 @@ confinamento, produce più energia di quanta ne serva per restare caldo?
   sul solver di trasporto; predice τ_E e T₀ con speed-up ~75×.
 - ✅ **Fase 12 — Dashboard interattiva**: app Streamlit che integra tutte le fasi
   con slider sui parametri macchina e aggiornamento dal vivo dei grafici.
+- ✅ **Fase 4B — Kernel C++**: solutore tridiagonale di Thomas in C++ (pybind11)
+  come backend alternativo del solver di trasporto, con benchmark vs scipy.
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -202,6 +204,29 @@ millisecondi (speed-up **~75×**), con R² ≈ 0.9 su dati mai visti. È il patt
 "physics + ML": un emulatore veloce per scan massicci o controllo in tempo
 reale. Gli scostamenti maggiori sono nei rari casi vicini all'ignition (mappa
 molto ripida).
+
+### Kernel C++ ad alte prestazioni (pybind11)
+
+![Benchmark C++](docs/cpp_benchmark.png)
+
+Il solutore tridiagonale al cuore dello schema implicito è riscritto in **C++**
+(algoritmo di Thomas) ed esposto a Python con **pybind11**, come backend
+alternativo (`TransportSolver1D(..., backend="cpp")`). Risultati misurati:
+
+- **Singolo solve**: il C++ è **3–13× più veloce** di `scipy.solve_banded` — il
+  solutore bandato *generico* di LAPACK ha un overhead che il Thomas
+  *specializzato* evita (vantaggio massimo sui sistemi piccoli).
+- **Evoluzione completa**: solo **~1.4×**, perché il solve è solo una frazione
+  del costo per passo (legge di Amdahl): la soluzione tridiagonale non è il
+  collo di bottiglia dell'intero step.
+
+Il kernel C++ è **opzionale**: senza compilarlo, il pacchetto usa scipy. Build:
+
+```bash
+pip install -e ".[cpp]"                  # aggiunge pybind11
+python setup_cpp.py build_ext --inplace  # compila tokamak._tridiag_cpp
+python notebooks/cpp_benchmark.py
+```
 
 ## Validazione
 

@@ -33,8 +33,8 @@ from dataclasses import dataclass, field
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.linalg import solve_banded
 
+from ._tridiag import solve_tridiagonal
 from .constants import KEV_TO_JOULE
 from .power_balance import (
     alpha_power_density,
@@ -56,6 +56,8 @@ class TransportSolver1D:
     T_edge:   temperatura imposta al bordo r=a [keV]
     n_cells:  numero di celle radiali
     z_eff:    carica efficace (perdite di Bremsstrahlung)
+    backend:  "scipy" (LAPACK) o "cpp" (kernel C++ di Thomas) per il solver
+              tridiagonale
     """
 
     a: float
@@ -65,6 +67,7 @@ class TransportSolver1D:
     T_edge: float = 0.1
     n_cells: int = 100
     z_eff: float = 1.0
+    backend: str = "scipy"
     insulated_edge: bool = False  # True: flusso nullo al bordo (Neumann), per test
 
     # Stato interno (inizializzato in __post_init__).
@@ -131,12 +134,8 @@ class TransportSolver1D:
         if not self.insulated_edge:
             rhs[-1] += g_right[-1] * self.T_edge  # contributo Dirichlet
 
-        # Formato 'banded' per solve_banded: righe [super-diag, diag, sub-diag].
-        ab = np.zeros((3, N))
-        ab[0, 1:] = upper[:-1]
-        ab[1, :] = diag
-        ab[2, :-1] = lower[1:]
-        self.T = solve_banded((1, 1), ab, rhs)
+        # Risoluzione del sistema tridiagonale, backend scelto (scipy o C++).
+        self.T = solve_tridiagonal(lower, diag, upper, rhs, backend=self.backend)
 
     def solve_steady_state(
         self,

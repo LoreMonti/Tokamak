@@ -27,3 +27,6 @@ env/
 # Generated figures (keep curated ones in docs/ tracked explicitly)
 *.tmp.png
 data/
+
+# Compiled C++ extensions (platform-specific, rebuild with setup_cpp.py)
+*.so
