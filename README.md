@@ -1,16 +1,50 @@
-# Tokamak — Simulatore di bilancio di potenza e trasporto di un plasma da fusione
+# ⚛️ Tokamak — Simulatore di un reattore a fusione
 
 [![CI](https://github.com/lorenzomonti/Tokamak/actions/workflows/ci.yml/badge.svg)](https://github.com/lorenzomonti/Tokamak/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![tests](https://img.shields.io/badge/tests-74%20passed-brightgreen)
+![lint](https://img.shields.io/badge/lint-ruff-orange)
+![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
-Simulatore della fisica di confinamento di un reattore a fusione (tokamak),
-costruito dai principi primi: dalla reattività nucleare al bilancio di potenza
-0D, fino (nelle fasi successive) al trasporto radiale 1D e ai vincoli
-ingegneristici reali.
+> Simulatore **end-to-end** della fisica, dell'ingegneria e del controllo di un
+> tokamak (reattore a fusione), costruito dai principi primi e validato contro i
+> parametri di ITER.
 
 **Domanda guida:** un plasma D-T a una data densità, temperatura e qualità di
-confinamento, produce più energia di quanta ne serva per restare caldo?
+confinamento, produce più energia di quanta ne serva per restare caldo? E la
+macchina che lo contiene, regge?
 
-## Stato del progetto
+Il progetto parte dalla reattività nucleare e arriva a un simulatore integrato:
+trasporto del calore, vincoli ingegneristici, controllo in retroazione,
+combustione auto-consistente, equilibrio magnetico 2D, ottimizzazione, un
+emulatore ML e un kernel C++ — il tutto con una rete di **74 test di
+validazione fisica** e una dashboard interattiva.
+
+### Cosa dimostra questo progetto
+
+- **Fisica del plasma**: reattività, bilancio di potenza, criterio di Lawson,
+  equilibrio MHD (Grad-Shafranov), combustione e radiazione.
+- **Metodi numerici**: PDE di diffusione (schema implicito a volumi finiti),
+  solver ellittici sparsi, integrazione di ODE, ottimizzazione vincolata.
+- **Ingegneria del reattore**: limiti operativi (Greenwald, Troyon, divertore),
+  ciclo del combustibile e tritium breeding.
+- **Teoria del controllo**: regolatori PID/PD, saturazione, anti-windup,
+  reiezione del disturbo, stabilizzazione di un sistema instabile.
+- **Machine learning**: surrogate model (processo gaussiano) del solver.
+- **Software/HPC**: pacchetto testato, CI, kernel **C++** con pybind11,
+  dashboard **Streamlit**.
+
+### Indice
+
+[Galleria & fisica](#la-fisica-in-breve) ·
+[Validazione](#validazione) ·
+[Struttura](#struttura-del-progetto) ·
+[Uso](#uso) ·
+[Dashboard](#dashboard-interattiva) ·
+[Roadmap](ROADMAP.md) ·
+[Riferimenti](#riferimenti)
+
+## Cosa c'è dentro (fasi)
 
 - ✅ **Fase 1 — Modello 0D**: reattività D-T, bilancio di potenza, fattore di
   guadagno *Q* e criterio di Lawson.
@@ -244,10 +278,10 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
 # Punto d'ingresso unico: esegue tutte le fasi (e, con --test, anche i test)
-python main.py --test       # test + tutte e 4 le fasi
-python main.py              # solo le 4 fasi (genera le figure in docs/)
-python main.py --phase 1 4  # solo le fasi indicate
-python main.py --only-test  # solo i test
+python main.py --test        # test + tutte le fasi (genera le figure in docs/)
+python main.py               # solo le fasi (figure)
+python main.py --phase 1 5   # solo le fasi indicate
+python main.py --only-test   # solo i test (74)
 
 # In alternativa, i singoli script:
 pytest
@@ -275,11 +309,40 @@ L'app integra tutte le fasi: slider su corrente, campo, densità, χ, riscaldame
 TBR… con grafici (spazio operativo + ottimo, profilo radiale, combustione, ciclo
 del trizio) aggiornati dal vivo.
 
+<!-- Suggerimento: cattura uno screenshot dell'app e salvalo come
+     docs/dashboard.png, poi mostralo qui:  ![Dashboard](docs/dashboard.png) -->
+
 ```python
 from tokamak import fusion_gain_Q
 
 # Q in stato stazionario per parametri tipo ITER
 Q = fusion_gain_Q(n_e=1.0e20, T_keV=15.0, tau_e=2.0)
+```
+
+## Struttura del progetto
+
+```
+Tokamak/
+├── src/tokamak/            # pacchetto: un modulo per dominio fisico
+│   ├── reactivity.py         # <σv>(T) — media maxwelliana della sezione d'urto
+│   ├── power_balance.py      # bilancio 0D, Q, criterio di Lawson
+│   ├── transport.py          # diffusione del calore 1D (implicita, volumi finiti)
+│   ├── engineering.py        # limiti di Greenwald, Troyon, divertore
+│   ├── control.py            # regolatore PID (saturazione + anti-windup)
+│   ├── equilibrium.py        # equilibrio 2D di Grad-Shafranov
+│   ├── burn.py               # combustione D-T auto-consistente + cenere He
+│   ├── radiation.py          # radiazione da impurità, Z_eff, collasso radiativo
+│   ├── optimization.py       # ottimizzazione vincolata del punto operativo
+│   ├── stability.py          # stabilità verticale e suo controllo
+│   ├── fuel_cycle.py         # consumo e breeding del trizio
+│   ├── surrogate.py          # emulatore ML (processo gaussiano)
+│   └── _tridiag.cpp/.py      # kernel C++ (Thomas) + wrapper, via pybind11
+├── tests/                  # 74 test di validazione fisica e numerica
+├── notebooks/              # script che generano le figure in docs/
+├── docs/                   # figure (gallery del README)
+├── dashboard.py            # app interattiva Streamlit
+├── main.py                 # punto d'ingresso unico (fasi + test)
+└── setup_cpp.py            # build dell'estensione C++
 ```
 
 ## Riferimenti
