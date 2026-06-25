@@ -33,6 +33,8 @@ confinamento, produce più energia di quanta ne serva per restare caldo?
   (SLSQP) della potenza di fusione sotto i limiti di Greenwald e Troyon.
 - ✅ **Fase 9 — Controllo di stabilità verticale**: stabilizzazione PD del plasma
   allungato (verticalmente instabile), con reiezione del disturbo.
+- ✅ **Fase 10 — Ciclo del combustibile**: consumo e breeding del trizio,
+  bilancio dell'inventario, TBR di autosufficienza e doubling time.
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -174,6 +176,16 @@ parete in pochi ms; un controllore **PD** (lo stesso `PIDController` con kᵢ=0)
 stabilizza se `b·kp > γ²`. La demo confronta anello aperto (fuga) e anello chiuso
 (stabilizzato + reiezione di un disturbo impulsivo).
 
+### Ciclo del combustibile (trizio)
+
+![Ciclo del combustibile](docs/fuel_cycle.png)
+
+Il trizio non esiste in natura: va prodotto nel mantello di litio. Un reattore
+da ~3 GW ne brucia ~0.5 kg/giorno, quindi serve `TBR = prodotto/consumato > 1`
+per l'autosufficienza. Il bilancio `dN/dt = (TBR−1)·burn − λN + S` mostra che
+solo con TBR>1 l'inventario cresce; il doubling time (per avviare nuovi reattori)
+diverge quando TBR→1.
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -206,6 +218,7 @@ python notebooks/burn_demo.py
 python notebooks/radiative_collapse.py
 python notebooks/optimum_demo.py
 python notebooks/vertical_control.py
+python notebooks/fuel_cycle_demo.py
 ```
 
 ```python

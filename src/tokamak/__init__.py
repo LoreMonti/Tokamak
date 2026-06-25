@@ -13,6 +13,12 @@ from .engineering import (
     troyon_beta_limit,
 )
 from .equilibrium import GradShafranovSolver
+from .fuel_cycle import (
+    doubling_time_years,
+    required_TBR,
+    simulate_inventory,
+    tritium_burn_rate_kg_per_day,
+)
 from .optimization import OptimalPoint, optimize_operating_point
 from .power_balance import (
     alpha_power_density,
@@ -72,4 +78,8 @@ __all__ = [
     "vertical_growth_rate",
     "closed_loop_is_stable",
     "simulate_vertical_control",
+    "tritium_burn_rate_kg_per_day",
+    "required_TBR",
+    "doubling_time_years",
+    "simulate_inventory",
 ]
