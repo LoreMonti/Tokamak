@@ -61,11 +61,19 @@ def run_profile(
 
 
 def generate_profile_dataset(
-    n_samples: int, seed: int = 0, n_cells: int = 40
+    n_samples: int, seed: int = 0, n_cells: int = 40, progress: bool = False
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Genera (X, Y): X (n,3) parametri, Y (n, 32) profili T(r)."""
+    """Genera (X, Y): X (n,3) parametri, Y (n, 32) profili T(r).
+
+    Con progress=True mostra una barra di avanzamento (tqdm).
+    """
     X = sample_parameters(n_samples, seed)
-    Y = np.array([run_profile(*row, n_cells=n_cells) for row in X])
+    rows = X
+    if progress:
+        from tqdm import tqdm
+
+        rows = tqdm(X, desc="Dataset (solver)", unit="campione")
+    Y = np.array([run_profile(*row, n_cells=n_cells) for row in rows])
     return X, Y
 
 
@@ -122,8 +130,12 @@ def train_profile_emulator(
     epochs: int = 1500,
     lr: float = 5e-3,
     seed: int = 0,
+    progress: bool = False,
 ) -> ProfileEmulator:
-    """Addestra l'MLP (input e output normalizzati, Adam, loss MSE)."""
+    """Addestra l'MLP (input e output normalizzati, Adam, loss MSE).
+
+    Con progress=True mostra una barra di avanzamento sugli epoch (tqdm).
+    """
     torch.manual_seed(seed)
     x_mean, x_std = X.mean(0), X.std(0)
     y_mean, y_std = Y.mean(0), Y.std(0)
@@ -134,7 +146,12 @@ def train_profile_emulator(
     opt = torch.optim.Adam(net.parameters(), lr=lr)
     loss_fn = nn.MSELoss()
     net.train()
-    for _ in range(epochs):
+    epoch_iter = range(epochs)
+    if progress:
+        from tqdm import tqdm
+
+        epoch_iter = tqdm(epoch_iter, desc="Training NN", unit="epoch")
+    for _ in epoch_iter:
         opt.zero_grad()
         loss = loss_fn(net(Xs), Ys)
         loss.backward()

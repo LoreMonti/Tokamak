@@ -39,10 +39,10 @@ def main() -> None:
         c = np.logspace(-5, np.log10(c_hi), 200)
         p_rad = np.array([total_radiated_power_density(n_e, T, {s: ci}) for ci in c])
         ax1.loglog(c, p_rad / 1e6, lw=2, label=f"{s} (Z={ATOMIC_NUMBER[s]})")
-    ax1.axhline(heating / 1e6, color="black", ls="--", lw=1.5, label="riscaldamento")
-    ax1.set_xlabel("frazione di impurità  $n_z/n_e$")
-    ax1.set_ylabel("potenza irraggiata [MW/m$^3$]")
-    ax1.set_title(f"Radiazione vs impurità (T={T:.0f} keV)")
+    ax1.axhline(heating / 1e6, color="black", ls="--", lw=1.5, label="heating")
+    ax1.set_xlabel("impurity fraction  $n_z/n_e$")
+    ax1.set_ylabel("radiated power [MW/m$^3$]")
+    ax1.set_title(f"Radiation vs impurity (T={T:.0f} keV)")
     ax1.legend(fontsize=8)
     ax1.grid(True, which="both", alpha=0.3)
 
@@ -52,9 +52,9 @@ def main() -> None:
     ax2.loglog(Z, c_max, "o-", color="crimson", lw=2, markersize=8)
     for s, zz, cm in zip(species_list, Z, c_max, strict=True):
         ax2.annotate(s, (zz, cm), textcoords="offset points", xytext=(6, 6))
-    ax2.set_xlabel("numero atomico Z")
-    ax2.set_ylabel("frazione massima prima del collasso")
-    ax2.set_title("Tolleranza alle impurità vs Z")
+    ax2.set_xlabel("atomic number Z")
+    ax2.set_ylabel("max fraction before collapse")
+    ax2.set_title("Impurity tolerance vs Z")
     ax2.grid(True, which="both", alpha=0.3)
 
     fig.tight_layout()

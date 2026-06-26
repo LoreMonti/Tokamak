@@ -77,12 +77,12 @@ def main() -> None:
 
     # --- Convergenza (entrambe vs numero di valutazioni) ---
     a1.plot(np.arange(1, len(bo_best) + 1), bo_best, "o-", color="crimson", ms=4,
-            label="ottimizzazione bayesiana")
+            label="Bayesian optimization")
     a1.plot(np.arange(1, len(slsqp_best) + 1), slsqp_best, "s-", color="navy", ms=4,
-            label="SLSQP (Fase 8)")
-    a1.set_xlabel("numero di valutazioni dell'obiettivo")
-    a1.set_ylabel(r"miglior $P_{fus}$ trovato [MW/m$^3$]")
-    a1.set_title("Convergenza: BO vs SLSQP")
+            label="SLSQP (Phase 8)")
+    a1.set_xlabel("number of objective evaluations")
+    a1.set_ylabel(r"best $P_{fus}$ found [MW/m$^3$]")
+    a1.set_title("Convergence: BO vs SLSQP")
     a1.legend(loc="lower right")
     a1.grid(True, alpha=0.3)
 
@@ -100,12 +100,12 @@ def main() -> None:
     a2.contour(TT, NN / 1e20, plasma_beta(NN, TT, cfg.B_toroidal_T),
                levels=[beta_max], colors="white", linewidths=2)
     a2.scatter(res.X[:, 1], res.X[:, 0], c="orange", s=22, edgecolor="k",
-               linewidth=0.4, label="punti valutati da BO")
+               linewidth=0.4, label="points evaluated by BO")
     a2.plot(res.best_x[1], res.best_x[0], marker="D", color="red", ms=7,
-            markeredgecolor="white", markeredgewidth=1.2, ls="", label="ottimo BO")
+            markeredgecolor="white", markeredgewidth=1.2, ls="", label="BO optimum")
     a2.set_xlabel("T [keV]")
     a2.set_ylabel(r"$n_e$ [$10^{20}$ m$^{-3}$]")
-    a2.set_title("Punti campionati (Greenwald/Troyon in bianco)")
+    a2.set_title("Sampled points (Greenwald/Troyon in white)")
     a2.legend(loc="upper right", fontsize=8)
     a2.set_xlim(2.0, T_max)
     a2.set_ylim(0.0, 1.1 * n_G / 1e20)

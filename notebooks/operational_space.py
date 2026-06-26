@@ -51,7 +51,7 @@ def main() -> None:
     fig, ax = plt.subplots(figsize=(8.5, 6))
 
     # Greenwald: regione proibita sopra n_G.
-    ax.axhline(n_G / 1e20, color="darkgreen", lw=2, ls="--", label="Limite di Greenwald")
+    ax.axhline(n_G / 1e20, color="darkgreen", lw=2, ls="--", label="Greenwald limit")
     ax.fill_between(T, n_G / 1e20, 2.0, color="green", alpha=0.08)
 
     # Troyon: contorno beta = beta_max.
@@ -66,15 +66,15 @@ def main() -> None:
     )
     ax.clabel(cs_q, fmt={1.0: "Q=1", 10.0: "Q=10"}, inline=True, fontsize=9)
 
-    ax.set_xlabel("Temperatura T [keV]")
-    ax.set_ylabel(r"Densita' $n_e$ [$10^{20}\,$m$^{-3}$]")
-    ax.set_title("Spazio operativo del tokamak (parametri ~ ITER)")
+    ax.set_xlabel("Temperature T [keV]")
+    ax.set_ylabel(r"Density $n_e$ [$10^{20}\,$m$^{-3}$]")
+    ax.set_title("Tokamak operational space (ITER-like parameters)")
     ax.set_ylim(0, 2.0)
 
     # Legenda con handle proxy (i contour non espongono piu' .collections).
     handles = [
-        Line2D([], [], color="darkgreen", ls="--", lw=2, label="Limite di Greenwald"),
-        Line2D([], [], color="purple", lw=2, label="Limite di Troyon (beta)"),
+        Line2D([], [], color="darkgreen", ls="--", lw=2, label="Greenwald limit"),
+        Line2D([], [], color="purple", lw=2, label="Troyon limit (beta)"),
         Line2D([], [], color="orange", lw=2, label="Break-even Q=1"),
         Line2D([], [], color="crimson", lw=2, label="Q=10 (target ITER)"),
     ]

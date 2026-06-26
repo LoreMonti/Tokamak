@@ -38,15 +38,15 @@ def main() -> None:
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(11.5, 4.8))
 
     # --- ROC ---
-    a1.plot(fpr, tpr, color="crimson", lw=2, label=f"classificatore (AUC={auc:.3f})")
-    a1.plot([0, 1], [0, 1], "k--", lw=1, label="caso casuale")
-    a1.set_xlabel("tasso falsi positivi")
-    a1.set_ylabel("tasso veri positivi")
-    a1.set_title("Curva ROC (predizione disruption)")
+    a1.plot(fpr, tpr, color="crimson", lw=2, label=f"classifier (AUC={auc:.3f})")
+    a1.plot([0, 1], [0, 1], "k--", lw=1, label="random baseline")
+    a1.set_xlabel("false positive rate")
+    a1.set_ylabel("true positive rate")
+    a1.set_title("ROC curve (disruption prediction)")
     a1.legend(loc="lower right")
     a1.grid(True, alpha=0.3)
 
-    # --- Regione sicura appresa, a Ip, B fissi ---
+    # --- Learned safe region, a Ip, B fissi ---
     Ip, B = 15.0, 5.3
     T = np.linspace(3.0, 30.0, 200)
     n = np.linspace(0.2e20, 1.6e20, 200)
@@ -58,7 +58,7 @@ def main() -> None:
     prob = clf.predict_proba(grid)[:, 1].reshape(TT.shape)
 
     cf = a2.contourf(TT, NN / 1e20, prob, levels=20, cmap="RdYlGn_r", vmin=0, vmax=1)
-    fig.colorbar(cf, ax=a2, label="prob. di disruption (appresa)")
+    fig.colorbar(cf, ax=a2, label="disruption probability (learned)")
     # Limiti fisici sovrapposti.
     n_G = greenwald_density(Ip, A_MINOR)
     beta_max = troyon_beta_limit(BETA_N, Ip, A_MINOR, B)
@@ -68,7 +68,7 @@ def main() -> None:
     a2.plot([], [], color="black", lw=2, label="Troyon")
     a2.set_xlabel("T [keV]")
     a2.set_ylabel(r"$n_e$ [$10^{20}$ m$^{-3}$]")
-    a2.set_title(f"Regione sicura appresa (Ip={Ip} MA, B={B} T)")
+    a2.set_title(f"Learned safe region (Ip={Ip} MA, B={B} T)")
     a2.legend(loc="upper right")
 
     fig.tight_layout()

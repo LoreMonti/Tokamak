@@ -54,20 +54,20 @@ def main() -> None:
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8.5, 6.5), sharex=True)
 
     ax1.plot(open_loop.time * 1e3, open_loop.z * 100, color="gray", lw=2,
-             label="anello aperto (no controllo)")
+             label="open loop (no control)")
     ax1.plot(closed_loop.time * 1e3, closed_loop.z * 100, color="crimson", lw=2,
-             label="anello chiuso (PD)")
-    ax1.axvline(t_kick * 1e3, color="black", ls=":", lw=1, label="disturbo")
-    ax1.set_ylabel("posizione z [cm]")
+             label="closed loop (PD)")
+    ax1.axvline(t_kick * 1e3, color="black", ls=":", lw=1, label="disturbance")
+    ax1.set_ylabel("z position [cm]")
     ax1.set_ylim(-5, 5)
-    ax1.set_title(f"Controllo di stabilita' verticale (kappa={elongation})")
+    ax1.set_title(f"Vertical stability control (kappa={elongation})")
     ax1.legend(loc="upper left")
     ax1.grid(True, alpha=0.3)
 
     ax2.plot(closed_loop.time * 1e3, closed_loop.u, color="navy", lw=1.5)
     ax2.axvline(t_kick * 1e3, color="black", ls=":", lw=1)
-    ax2.set_xlabel("tempo [ms]")
-    ax2.set_ylabel("comando bobine u")
+    ax2.set_xlabel("time [ms]")
+    ax2.set_ylabel("coil command u")
     ax2.grid(True, alpha=0.3)
 
     fig.tight_layout()

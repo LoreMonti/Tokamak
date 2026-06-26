@@ -46,9 +46,11 @@ def main() -> None:
 
     t0 = time.perf_counter()
     print("Addestramento RL 'energy-aware' (action_cost alto)...")
-    model_eco = train_ppo(timesteps=timesteps, seed=0, disturb_step=100, action_cost=1e-3)
+    model_eco = train_ppo(timesteps=timesteps, seed=0, disturb_step=100,
+                          action_cost=1e-3, progress=True)
     print("Addestramento RL 'precisione' (action_cost ~ 0)...")
-    model_pre = train_ppo(timesteps=timesteps, seed=0, disturb_step=100, action_cost=1e-6)
+    model_pre = train_ppo(timesteps=timesteps, seed=0, disturb_step=100,
+                          action_cost=1e-6, progress=True)
     print(f"Due agenti addestrati in {time.perf_counter() - t0:.0f} s")
 
     # Valutazione: stesso scenario per tutti (stesso seed -> stessa T0).
@@ -75,20 +77,20 @@ def main() -> None:
     a1.plot(t_axis, res_eco["T"], color="crimson", lw=2,
             label=f"RL energy-aware (RMSE {rmse['RL eco']:.2f})")
     a1.plot(t_axis, res_pre["T"], color="green", lw=2,
-            label=f"RL precisione (RMSE {rmse['RL precisione']:.2f})")
+            label=f"RL precision (RMSE {rmse['RL precisione']:.2f})")
     a1.axhline(target, color="black", ls="--", lw=1, label="target")
     a1.axvline(t_dist, color="gray", ls=":", lw=1)
     a1.set_ylabel("T [keV]")
-    a1.set_title("Controllo della temperatura: due RL vs PID")
+    a1.set_title("Temperature control: two RL agents vs PID")
     a1.legend(loc="lower right", fontsize=8)
     a1.grid(True, alpha=0.3)
 
     a2.plot(t_axis, res_pid["action"], color="navy", lw=1.3)
     a2.plot(t_axis, res_eco["action"], color="crimson", lw=1.3)
     a2.plot(t_axis, res_pre["action"], color="green", lw=1.3)
-    a2.axvline(t_dist, color="gray", ls=":", lw=1, label="disturbo (τ_E ↓)")
-    a2.set_xlabel("tempo [s]")
-    a2.set_ylabel("azione (P_ext / P_max)")
+    a2.axvline(t_dist, color="gray", ls=":", lw=1, label="disturbance (τ_E ↓)")
+    a2.set_xlabel("time [s]")
+    a2.set_ylabel("action (P_ext / P_max)")
     a2.legend(loc="upper right", fontsize=8)
     a2.grid(True, alpha=0.3)
 

@@ -96,7 +96,7 @@ def main() -> None:
     ax.set_xlabel("R [m]", color="white")
     ax.set_ylabel("Z [m]", color="white")
     ax.tick_params(colors="white")
-    title = ax.set_title("Accensione del plasma  —  t = 0.0 s", color="white")
+    title = ax.set_title("Plasma ignition  —  t = 0.0 s", color="white")
     cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
     cbar.set_label("T [keV]", color="white")
     cbar.ax.yaxis.set_tick_params(color="white")
@@ -106,7 +106,7 @@ def main() -> None:
 
     def update(k: int):
         im.set_data(temperature_field(snaps[k]).T)
-        title.set_text(f"Accensione del plasma  —  t = {k * dt_frame:.1f} s")
+        title.set_text(f"Plasma ignition  —  t = {k * dt_frame:.1f} s")
         return im, title
 
     anim = FuncAnimation(fig, update, frames=n_frames, interval=80, blit=False)

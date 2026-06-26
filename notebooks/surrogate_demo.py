@@ -72,12 +72,12 @@ def main() -> None:
         lim = [min(true.min(), p.min()), max(true.max(), p.max())]
         ax.plot(lim, lim, "k--", lw=1)
         r2 = score.r2_tau_E if k == 0 else score.r2_T0
-        ax.set_xlabel(f"{name} vero [{unit}]")
-        ax.set_ylabel(f"{name} predetto [{unit}]")
+        ax.set_xlabel(f"true {name} [{unit}]")
+        ax.set_ylabel(f"predicted {name} [{unit}]")
         ax.set_title(f"{name}  ($R^2$={r2:.3f})")
         ax.grid(True, alpha=0.3)
 
-    fig.suptitle(f"Emulatore GP vs solver — speed-up ~{t_solver/t_surr:.0f}x")
+    fig.suptitle(f"GP emulator vs solver — speed-up ~{t_solver/t_surr:.0f}x")
     fig.tight_layout()
     DOCS.mkdir(exist_ok=True)
     out = DOCS / "surrogate.png"

@@ -52,13 +52,13 @@ def main() -> None:
     ax.contour(TT, NN / 1e20, beta_grid, levels=[beta_max], colors="white", linewidths=2)
     ax.plot(opt.T_keV, opt.n_e / 1e20, "r*", markersize=22, markeredgecolor="white")
 
-    ax.set_xlabel("Temperatura T [keV]")
-    ax.set_ylabel(r"Densita' $n_e$ [$10^{20}$ m$^{-3}$]")
-    ax.set_title("Punto operativo ottimo (max $P_{fus}$ sotto i vincoli)")
+    ax.set_xlabel("Temperature T [keV]")
+    ax.set_ylabel(r"Density $n_e$ [$10^{20}$ m$^{-3}$]")
+    ax.set_title("Optimal operating point (max $P_{fus}$ under constraints)")
     handles = [
         Line2D([], [], color="white", ls="--", lw=2, label="Greenwald"),
         Line2D([], [], color="white", lw=2, label="Troyon (beta)"),
-        Line2D([], [], color="red", marker="*", ls="", markersize=14, label="ottimo"),
+        Line2D([], [], color="red", marker="*", ls="", markersize=14, label="optimum"),
     ]
     ax.legend(handles=handles, loc="upper right")
     fig.tight_layout()

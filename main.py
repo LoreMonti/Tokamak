@@ -1,14 +1,16 @@
 """Punto d'ingresso unico del progetto Tokamak.
 
-Esegue, in un colpo solo, le quattro fasi (generando i grafici in docs/) e,
-opzionalmente, la suite di test.
+Esegue, in un colpo solo, tutte le fasi (generando i grafici in docs/) e,
+opzionalmente, la suite di test. Le fasi 15 (PyTorch) e 16 (RL) mostrano una
+barra di avanzamento e sono saltate con un avviso se i rispettivi extra
+([ml]/[rl]) non sono installati.
 
 Esempi
 ------
-    python main.py                # esegue tutte e 4 le fasi (genera le figure)
-    python main.py --test         # esegue prima i test, poi le 4 fasi
-    python main.py --only-test    # esegue soltanto i test
-    python main.py --phase 1 3    # esegue solo le fasi indicate
+    python main.py                 # esegue tutte le fasi (genera le figure)
+    python main.py --test          # esegue prima i test, poi le fasi
+    python main.py --only-test     # esegue soltanto i test
+    python main.py --phase 15 16   # esegue solo le fasi indicate
 """
 
 from __future__ import annotations
@@ -37,7 +39,14 @@ PHASES = {
     11: ("Emulatore ML del solver (surrogate)", NOTEBOOKS / "surrogate_demo.py"),
     13: ("Predizione di disruption (ML)", NOTEBOOKS / "disruption_demo.py"),
     14: ("Ottimizzazione bayesiana", NOTEBOOKS / "bayesopt_demo.py"),
+    15: ("Emulatore deep-learning dei profili (PyTorch)",
+         NOTEBOOKS / "profile_emulator_demo.py"),
+    16: ("Controllo con Reinforcement Learning (PPO)",
+         NOTEBOOKS / "rl_control_demo.py"),
 }
+
+# Fasi che richiedono dipendenze opzionali (saltate con un avviso se mancano).
+_OPTIONAL_PHASES = {15: "[ml] (torch)", 16: "[rl] (gymnasium + stable-baselines3)"}
 
 
 def _banner(text: str) -> None:
@@ -53,10 +62,19 @@ def run_tests() -> int:
 
 
 def run_phase(num: int) -> None:
-    """Esegue lo script dimostrativo di una fase."""
+    """Esegue lo script dimostrativo di una fase.
+
+    Le fasi con dipendenze opzionali (15, 16) vengono saltate con un avviso se i
+    pacchetti non sono installati, invece di interrompere l'intera esecuzione.
+    """
     title, script = PHASES[num]
     _banner(f"FASE {num} — {title}")
-    runpy.run_path(str(script), run_name="__main__")
+    try:
+        runpy.run_path(str(script), run_name="__main__")
+    except ImportError as exc:
+        extra = _OPTIONAL_PHASES.get(num, "una dipendenza")
+        print(f"[salto] Fase {num}: manca {extra}. Installa con "
+              f'`pip install -e ".{extra.split()[0]}"`. ({exc})')
 
 
 def main(argv: list[str] | None = None) -> int:

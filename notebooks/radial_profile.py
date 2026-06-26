@@ -45,10 +45,10 @@ def main() -> None:
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot(solver.r, solver.T, color="crimson", lw=2)
     ax.fill_between(solver.r, solver.T, alpha=0.1, color="crimson")
-    ax.set_xlabel("Raggio minore r [m]")
-    ax.set_ylabel("Temperatura T [keV]")
+    ax.set_xlabel("Minor radius r [m]")
+    ax.set_ylabel("Temperature T [keV]")
     ax.set_title(
-        f"Profilo radiale stazionario  —  $T_0$={solver.T[0]:.1f} keV, "
+        f"Steady-state radial profile  —  $T_0$={solver.T[0]:.1f} keV, "
         rf"$\tau_E$={tau:.2f} s"
     )
     ax.grid(True, alpha=0.3)

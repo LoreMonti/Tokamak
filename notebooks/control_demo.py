@@ -55,17 +55,17 @@ def main() -> None:
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8.5, 6), sharex=True)
 
-    ax1.plot(hist.time, hist.measurement, color="crimson", lw=2, label="$T_0$ (misurata)")
+    ax1.plot(hist.time, hist.measurement, color="crimson", lw=2, label="$T_0$ (measured)")
     ax1.axhline(target_T0, color="black", ls="--", lw=1, label="target")
     ax1.axvline(t_dist, color="gray", ls=":", lw=1)
     ax1.set_ylabel("$T_0$ [keV]")
-    ax1.set_title("Controllo PID della temperatura centrale")
+    ax1.set_title("PID control of core temperature")
     ax1.legend(loc="lower right")
     ax1.grid(True, alpha=0.3)
 
     ax2.plot(hist.time, hist.power / 1e6, color="navy", lw=2)
-    ax2.axvline(t_dist, color="gray", ls=":", lw=1, label="degrado confinamento")
-    ax2.set_xlabel("tempo [s]")
+    ax2.axvline(t_dist, color="gray", ls=":", lw=1, label="confinement degradation")
+    ax2.set_xlabel("time [s]")
     ax2.set_ylabel("$P_{ext}$ [MW]")
     ax2.legend(loc="lower right")
     ax2.grid(True, alpha=0.3)

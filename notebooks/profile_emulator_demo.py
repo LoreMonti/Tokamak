@@ -30,9 +30,9 @@ DOCS = Path(__file__).resolve().parent.parent / "docs"
 
 
 def main() -> None:
-    X, Y = generate_profile_dataset(300, seed=11, n_cells=40)
+    X, Y = generate_profile_dataset(300, seed=11, n_cells=40, progress=True)
     n_tr = 240
-    emu = train_profile_emulator(X[:n_tr], Y[:n_tr], epochs=2500, seed=0)
+    emu = train_profile_emulator(X[:n_tr], Y[:n_tr], epochs=2500, seed=0, progress=True)
     X_te, Y_te = X[n_tr:], Y[n_tr:]
     r2 = profile_r2(emu, X_te, Y_te)
     rmse = profile_rmse(emu, X_te, Y_te)
@@ -59,11 +59,11 @@ def main() -> None:
     for c, i in zip(colors, idx, strict=False):
         a1.plot(RADIAL_GRID, Y_te[i], color=c, lw=2)
         a1.plot(RADIAL_GRID, pred[i], color=c, ls="--", lw=1.5)
-    a1.plot([], [], "k-", label="solver (vero)")
-    a1.plot([], [], "k--", label="rete neurale")
+    a1.plot([], [], "k-", label="solver (true)")
+    a1.plot([], [], "k--", label="neural network")
     a1.set_xlabel("r / a")
     a1.set_ylabel("T [keV]")
-    a1.set_title("Profili: solver vs emulatore NN")
+    a1.set_title("Profiles: solver vs NN emulator")
     a1.legend()
     a1.grid(True, alpha=0.3)
 
@@ -72,12 +72,12 @@ def main() -> None:
                edgecolor="none")
     lim = [0, Y_te.max() * 1.05]
     a2.plot(lim, lim, "k--", lw=1)
-    a2.set_xlabel("T vero [keV]")
-    a2.set_ylabel("T predetto [keV]")
+    a2.set_xlabel("true T [keV]")
+    a2.set_ylabel("predicted T [keV]")
     a2.set_title(f"Parity ($R^2$={r2:.3f}, RMSE={rmse:.2f} keV)")
     a2.grid(True, alpha=0.3)
 
-    fig.suptitle(f"Emulatore NN del profilo T(r) — speed-up ~{t_solver/t_emu:.0f}x")
+    fig.suptitle(f"NN emulator of the T(r) profile — speed-up ~{t_solver/t_emu:.0f}x")
     fig.tight_layout()
     DOCS.mkdir(exist_ok=True)
     out = DOCS / "profile_emulator.png"

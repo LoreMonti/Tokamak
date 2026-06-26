@@ -53,7 +53,7 @@ def main() -> None:
     t_sci = [_time_solve("scipy", n, reps) * 1e6 for n in sizes]  # microsecondi
     t_cpp = [_time_solve("cpp", n, reps) * 1e6 for n in sizes]
 
-    print("Singolo solve tridiagonale (microsecondi):")
+    print("Single tridiagonal solve (microsecondi):")
     print(f"{'n':>6} {'scipy':>10} {'cpp':>10} {'speedup':>9}")
     for n, ts, tc in zip(sizes, t_sci, t_cpp, strict=True):
         print(f"{n:>6} {ts:>10.2f} {tc:>10.2f} {ts/tc:>8.2f}x")
@@ -69,19 +69,19 @@ def main() -> None:
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.5))
     a1.plot(sizes, t_sci, "o-", label="scipy (LAPACK)", color="navy")
     a1.plot(sizes, t_cpp, "s-", label="C++ (Thomas)", color="crimson")
-    a1.set_xlabel("dimensione del sistema n")
-    a1.set_ylabel("tempo per solve [µs]")
-    a1.set_title("Singolo solve tridiagonale")
+    a1.set_xlabel("system size n")
+    a1.set_ylabel("time per solve [µs]")
+    a1.set_title("Single tridiagonal solve")
     a1.legend()
     a1.grid(True, alpha=0.3)
 
     a2.bar(["scipy", "C++"], [time_sci * 1e3, time_cpp * 1e3],
            color=["navy", "crimson"])
-    a2.set_ylabel("tempo [ms]")
-    a2.set_title("Evoluzione completa (200 celle)")
+    a2.set_ylabel("time [ms]")
+    a2.set_title("Full evolution (200 cells)")
     a2.grid(True, alpha=0.3, axis="y")
 
-    fig.suptitle("Benchmark kernel C++ vs scipy")
+    fig.suptitle("C++ kernel vs scipy benchmark")
     fig.tight_layout()
     DOCS.mkdir(exist_ok=True)
     out = DOCS / "cpp_benchmark.png"

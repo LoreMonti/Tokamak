@@ -354,10 +354,14 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
 # Punto d'ingresso unico: esegue tutte le fasi (e, con --test, anche i test)
-python main.py --test        # test + tutte le fasi (genera le figure in docs/)
-python main.py               # solo le fasi (figure)
-python main.py --phase 1 5   # solo le fasi indicate
-python main.py --only-test   # solo i test (74)
+python main.py --test         # test + tutte le fasi (genera le figure in docs/)
+python main.py                # solo le fasi (figure)
+python main.py --phase 15 16  # solo le fasi indicate (con barra di avanzamento)
+python main.py --only-test    # solo i test
+
+# Le fasi 15 (PyTorch) e 16 (RL) hanno una barra di avanzamento nel terminale e
+# vengono saltate con un avviso se i rispettivi extra non sono installati:
+#   pip install -e ".[ml]" ".[rl]"
 
 # In alternativa, i singoli script:
 pytest
@@ -395,11 +399,7 @@ streamlit run dashboard.py  # apre l'app nel browser
 
 L'app integra tutte le fasi: slider su corrente, campo, densità, $\chi$,
 riscaldamento, TBR… con grafici (spazio operativo + ottimo, profilo radiale,
-combustione, ciclo
-del trizio) aggiornati dal vivo.
-
-<!-- Suggerimento: cattura uno screenshot dell'app e salvalo come
-     docs/dashboard.png, poi mostralo qui:  ![Dashboard](docs/dashboard.png) -->
+combustione, ciclo del trizio) aggiornati dal vivo.
 
 ```python
 from tokamak import fusion_gain_Q

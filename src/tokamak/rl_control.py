@@ -175,11 +175,16 @@ def rl_policy(model):
     return act_fn
 
 
-def train_ppo(timesteps: int = 60000, seed: int = 0, **env_kwargs):
-    """Addestra un agente PPO (stable-baselines3) sull'ambiente di controllo."""
+def train_ppo(
+    timesteps: int = 60000, seed: int = 0, progress: bool = False, **env_kwargs
+):
+    """Addestra un agente PPO (stable-baselines3) sull'ambiente di controllo.
+
+    Con progress=True mostra la barra di avanzamento dei timestep (tqdm/rich).
+    """
     from stable_baselines3 import PPO
 
     env = FusionControlEnv(**env_kwargs)
     model = PPO("MlpPolicy", env, seed=seed, verbose=0)
-    model.learn(total_timesteps=timesteps)
+    model.learn(total_timesteps=timesteps, progress_bar=progress)
     return model

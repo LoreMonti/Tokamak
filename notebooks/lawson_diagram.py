@@ -37,25 +37,25 @@ def main() -> None:
     iter_T, iter_ntt = 14.0, 3e21
 
     fig, ax = plt.subplots(figsize=(8, 5.5))
-    ax.plot(T, ntt_ideal, "--", color="gray", label="Ignition ideale (no Bremsstrahlung)")
-    ax.plot(T, ntt_with_brem, color="crimson", lw=2, label="Ignition reale (con Bremsstrahlung)")
+    ax.plot(T, ntt_ideal, "--", color="gray", label="Ideal ignition (no Bremsstrahlung)")
+    ax.plot(T, ntt_with_brem, color="crimson", lw=2, label="Real ignition (with Bremsstrahlung)")
     ax.scatter([iter_T], [iter_ntt], color="navy", zorder=5, s=60,
-               label="Obiettivo ITER (~3e21)")
+               label="ITER target (~3e21)")
 
     # Minimo della curva reale.
     finite = np.isfinite(ntt_with_brem)
     i_min = np.argmin(np.where(finite, ntt_with_brem, np.inf))
     ax.annotate(
-        f"minimo ~{T[i_min]:.0f} keV",
+        f"minimum ~{T[i_min]:.0f} keV",
         xy=(T[i_min], ntt_with_brem[i_min]),
         xytext=(T[i_min] + 18, ntt_with_brem[i_min] * 2.5),
         arrowprops={"arrowstyle": "->"},
     )
 
     ax.set_yscale("log")
-    ax.set_xlabel("Temperatura T [keV]")
-    ax.set_ylabel(r"Triplo prodotto richiesto  $n\,T\,\tau_E$  [keV·s·m$^{-3}$]")
-    ax.set_title("Criterio di Lawson per il plasma D-T")
+    ax.set_xlabel("Temperature T [keV]")
+    ax.set_ylabel(r"Required triple product  $n\,T\,\tau_E$  [keV·s·m$^{-3}$]")
+    ax.set_title("Lawson criterion for D-T plasma")
     ax.set_ylim(1e21, 1e23)
     ax.grid(True, which="both", alpha=0.3)
     ax.legend()

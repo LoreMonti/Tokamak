@@ -59,8 +59,8 @@ def main() -> None:
     ax.set_aspect("equal")
     ax.set_xlabel("R [m]")
     ax.set_ylabel("Z [m]")
-    ax.set_title("Superfici magnetiche (Grad-Shafranov)")
-    fig.colorbar(cf, ax=ax, label=r"$\psi$ (flusso poloidale)", shrink=0.8)
+    ax.set_title("Magnetic flux surfaces (Grad-Shafranov)")
+    fig.colorbar(cf, ax=ax, label=r"$\psi$ (poloidal flux)", shrink=0.8)
     fig.tight_layout()
 
     DOCS.mkdir(exist_ok=True)
