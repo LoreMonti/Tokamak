@@ -93,6 +93,8 @@ validazione fisica** e una dashboard interattiva.
   la regione sicura dai soli dati (ROC-AUC ≈ 0.99).
 - ✅ **Fase 14 — Ottimizzazione bayesiana**: GP + Expected Improvement che trova
   il punto operativo ottimo in poche valutazioni (~97% dell'ottimo SLSQP in ~36).
+- ✅ **Fase 15 — Emulatore deep-learning (PyTorch)**: rete neurale che predice
+  l'intero profilo $T(r)$ (output vettoriale), R² ≈ 0.99, speed-up ~100×.
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -299,6 +301,15 @@ l'**Expected Improvement** sceglie il prossimo punto più promettente. Converge 
 vicino all'ottimo (sul bordo di Troyon). È il metodo d'elezione quando ogni
 valutazione è costosa (solver lenti, esperimenti).
 
+### Emulatore deep-learning del profilo (PyTorch)
+
+![Emulatore NN del profilo](docs/profile_emulator.png)
+
+Mentre la Fase 11 emula con un GP grandezze *scalari*, qui una **rete neurale**
+(PyTorch) predice l'**intero profilo radiale** $T(r)$ dai parametri — un output
+vettoriale (regressione funzionale). Sui profili di test: **R² ≈ 0.99**, RMSE
+≈ 0.27 keV, **speed-up ~100×**. Richiede l'extra `[ml]` (PyTorch).
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -337,6 +348,10 @@ python notebooks/disruption_demo.py  # classificatore di disruption (ROC + regio
 python notebooks/bayesopt_demo.py    # ottimizzazione bayesiana (convergenza)
 python notebooks/plasma_animation.py          # GIF accensione, sezione poloidale (D)
 python notebooks/plasma_animation_toroidal.py # GIF accensione, vista dall'alto (anello)
+
+# Emulatore deep-learning dei profili (richiede PyTorch)
+pip install -e ".[ml]"
+python notebooks/profile_emulator_demo.py
 ```
 
 ### Dashboard interattiva
