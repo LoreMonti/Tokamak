@@ -101,8 +101,8 @@ def main() -> None:
                levels=[beta_max], colors="white", linewidths=2)
     a2.scatter(res.X[:, 1], res.X[:, 0], c="orange", s=22, edgecolor="k",
                linewidth=0.4, label="punti valutati da BO")
-    a2.plot(res.best_x[1], res.best_x[0], marker="D", color="red", ms=11,
-            markeredgecolor="white", markeredgewidth=1.5, ls="", label="ottimo BO")
+    a2.plot(res.best_x[1], res.best_x[0], marker="D", color="red", ms=7,
+            markeredgecolor="white", markeredgewidth=1.2, ls="", label="ottimo BO")
     a2.set_xlabel("T [keV]")
     a2.set_ylabel(r"$n_e$ [$10^{20}$ m$^{-3}$]")
     a2.set_title("Punti campionati (Greenwald/Troyon in bianco)")
