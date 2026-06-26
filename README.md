@@ -10,6 +10,14 @@
 > tokamak (reattore a fusione), costruito dai principi primi e validato contro i
 > parametri di ITER.
 
+<p align="center">
+  <img src="docs/plasma_heating.gif" alt="Accensione del plasma nella sezione a D del tokamak" width="380">
+</p>
+
+<p align="center"><sub>Accensione del plasma nella sezione poloidale a D: il profilo
+di temperatura 1D (Fase 2) mappato sulle superfici magnetiche dell'equilibrio di
+Grad-Shafranov (Fase 5). Modello ridotto a scopo illustrativo.</sub></p>
+
 **Domanda guida:** un plasma D-T a una data densità, temperatura e qualità di
 confinamento, produce più energia di quanta ne serva per restare caldo? E la
 macchina che lo contiene, regge?
@@ -292,6 +300,7 @@ python notebooks/optimum_demo.py
 python notebooks/vertical_control.py
 python notebooks/fuel_cycle_demo.py
 python notebooks/surrogate_demo.py   # genera un dataset col solver (lento la 1ª volta)
+python notebooks/plasma_animation.py # genera la GIF di accensione (docs/plasma_heating.gif)
 ```
 
 ### Dashboard interattiva
