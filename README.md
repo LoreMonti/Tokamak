@@ -317,18 +317,26 @@ vettoriale (regressione funzionale). Sui profili di test: **R² ≈ 0.99**, RMSE
 ![Controllo RL](docs/rl_control.png)
 
 Sulla scia di DeepMind/TCV (*Nature* 2022), un agente **PPO** (gymnasium +
-stable-baselines3) impara a regolare il riscaldamento per tenere la temperatura
-al target, **senza modello e senza guadagni** — solo per tentativi. Confronto
-onesto col PID (Fase 4A) sulla stessa dinamica e con lo stesso disturbo:
+stable-baselines3) impara a regolare il riscaldamento, **senza modello e senza
+guadagni** — solo per tentativi. Esperimento controllato a tre vie sulla stessa
+dinamica e disturbo, con RMSE al target [keV]:
 
-- l'RL impara un controllore **veloce e stabile** da zero;
-- ma il **PID ben tarato è più preciso** (RMSE 0.41 vs 0.79 keV): grazie al
-  termine integrale azzera l'errore stazionario, mentre l'agente RL conserva un
-  piccolo offset.
+| Controllore | RMSE | Note |
+|---|---|---|
+| **PID** (Fase 4A) | **0.41** | centra il target (termine integrale) |
+| RL energy-aware (costo potenza alto) | 0.90 | veloce, ma offset sotto il target |
+| RL precisione (costo potenza ≈ 0) | 0.86 | offset quasi invariato |
 
-È l'esito atteso: su un sistema così semplice il PID è quasi imbattibile; il
-vantaggio dell'RL emerge su sistemi complessi e ad alta dimensione (come il
-controllo magnetico multi-bobina di TCV). Richiede l'extra `[rl]`.
+Il risultato è **istruttivo**: abbassare il costo della potenza *non* elimina
+l'offset dell'RL. La causa non è il reward shaping ma l'**architettura del
+controllore**: la policy RL è senza memoria (mappa stato→azione e non osserva
+`τ_E`), quindi non può azzerare un disturbo costante — allo stesso stato
+servirebbero azioni diverse prima e dopo il disturbo. Il PID ci riesce proprio
+grazie al **termine integrale**, che accumula la storia dell'errore.
+
+Morale (onesta): su un sistema così semplice il controllo classico è quasi
+imbattibile; il vantaggio dell'RL emerge su sistemi complessi e ad alta
+dimensione (controllo magnetico multi-bobina di TCV). Richiede l'extra `[rl]`.
 
 ## Validazione
 
