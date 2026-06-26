@@ -91,6 +91,8 @@ validazione fisica** e una dashboard interattiva.
 - ✅ **Fase 13 — Predizione di disruption (ML)**: classificatore (gradient
   boosting) che predice se un punto operativo è stabile o disrupta; "riscopre"
   la regione sicura dai soli dati (ROC-AUC ≈ 0.99).
+- ✅ **Fase 14 — Ottimizzazione bayesiana**: GP + Expected Improvement che trova
+  il punto operativo ottimo in poche valutazioni (~97% dell'ottimo SLSQP in ~36).
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -286,6 +288,17 @@ regione sicura *appresa* dai soli dati coincide con i limiti fisici (verde =
 sicuro, sotto Greenwald e Troyon). È il pattern della predizione di disruzioni in
 tempo reale, una delle applicazioni ML più reali in fusione.
 
+### Ottimizzazione bayesiana
+
+![Ottimizzazione bayesiana](docs/bayesopt.png)
+
+Trova il punto operativo che massimizza $P_\text{fus}$ (sotto i vincoli)
+trattandolo come scatola nera: un GP modella la funzione dai punti già valutati e
+l'**Expected Improvement** sceglie il prossimo punto più promettente. Converge a
+**~97% dell'ottimo SLSQP (Fase 8) in ~36 valutazioni**, concentrando i campioni
+vicino all'ottimo (sul bordo di Troyon). È il metodo d'elezione quando ogni
+valutazione è costosa (solver lenti, esperimenti).
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -321,6 +334,7 @@ python notebooks/vertical_control.py
 python notebooks/fuel_cycle_demo.py
 python notebooks/surrogate_demo.py   # genera un dataset col solver (lento la 1ª volta)
 python notebooks/disruption_demo.py  # classificatore di disruption (ROC + regione sicura)
+python notebooks/bayesopt_demo.py    # ottimizzazione bayesiana (convergenza)
 python notebooks/plasma_animation.py          # GIF accensione, sezione poloidale (D)
 python notebooks/plasma_animation_toroidal.py # GIF accensione, vista dall'alto (anello)
 ```

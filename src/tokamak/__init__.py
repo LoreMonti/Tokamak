@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from .bayesopt import (
+    bayesian_optimize,
+    expected_improvement,
+    make_operating_point_objective,
+)
 from .burn import BurnState, simulate_burn, z_effective
 from .control import PIDController, simulate_controlled
 from .disruption import (
@@ -94,4 +99,7 @@ __all__ = [
     "generate_labeled_dataset",
     "train_disruption_classifier",
     "evaluate_classifier",
+    "bayesian_optimize",
+    "expected_improvement",
+    "make_operating_point_objective",
 ]
