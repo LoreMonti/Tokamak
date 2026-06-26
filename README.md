@@ -11,12 +11,17 @@
 > parametri di ITER.
 
 <p align="center">
-  <img src="docs/plasma_heating.gif" alt="Accensione del plasma nella sezione a D del tokamak" width="380">
+  <img src="docs/plasma_heating_toroidal.gif" alt="Plasma visto dall'alto (anello toroidale)" height="320">
+  &nbsp;&nbsp;
+  <img src="docs/plasma_heating.gif" alt="Plasma nella sezione poloidale a D" height="320">
 </p>
 
-<p align="center"><sub>Accensione del plasma nella sezione poloidale a D: il profilo
-di temperatura 1D (Fase 2) mappato sulle superfici magnetiche dell'equilibrio di
-Grad-Shafranov (Fase 5). Modello ridotto a scopo illustrativo.</sub></p>
+<p align="center"><sub>Accensione del plasma in due viste: a sinistra <b>dall'alto</b>
+(piano toroidale — l'anello con il foro centrale della "ciambella"); a destra la
+<b>sezione poloidale</b> a D (taglio verticale, il centro brillante è l'asse
+magnetico). Il profilo di temperatura 1D (Fase 2) è mappato sulle superfici
+magnetiche dell'equilibrio di Grad-Shafranov (Fase 5). Modello ridotto a scopo
+illustrativo.</sub></p>
 
 **Domanda guida:** un plasma D-T a una data densità, temperatura e qualità di
 confinamento, produce più energia di quanta ne serva per restare caldo? E la
@@ -300,7 +305,8 @@ python notebooks/optimum_demo.py
 python notebooks/vertical_control.py
 python notebooks/fuel_cycle_demo.py
 python notebooks/surrogate_demo.py   # genera un dataset col solver (lento la 1ª volta)
-python notebooks/plasma_animation.py # genera la GIF di accensione (docs/plasma_heating.gif)
+python notebooks/plasma_animation.py          # GIF accensione, sezione poloidale (D)
+python notebooks/plasma_animation_toroidal.py # GIF accensione, vista dall'alto (anello)
 ```
 
 ### Dashboard interattiva
