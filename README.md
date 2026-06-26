@@ -95,6 +95,8 @@ validazione fisica** e una dashboard interattiva.
   il punto operativo ottimo in poche valutazioni (~97% dell'ottimo SLSQP in ~36).
 - ✅ **Fase 15 — Emulatore deep-learning (PyTorch)**: rete neurale che predice
   l'intero profilo $T(r)$ (output vettoriale), R² ≈ 0.99, speed-up ~100×.
+- ✅ **Fase 16 — Controllo con Reinforcement Learning**: agente PPO che impara a
+  regolare il riscaldamento (gymnasium + stable-baselines3), confrontato col PID.
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -310,6 +312,24 @@ Mentre la Fase 11 emula con un GP grandezze *scalari*, qui una **rete neurale**
 vettoriale (regressione funzionale). Sui profili di test: **R² ≈ 0.99**, RMSE
 ≈ 0.27 keV, **speed-up ~100×**. Richiede l'extra `[ml]` (PyTorch).
 
+### Controllo con Reinforcement Learning (PPO vs PID)
+
+![Controllo RL](docs/rl_control.png)
+
+Sulla scia di DeepMind/TCV (*Nature* 2022), un agente **PPO** (gymnasium +
+stable-baselines3) impara a regolare il riscaldamento per tenere la temperatura
+al target, **senza modello e senza guadagni** — solo per tentativi. Confronto
+onesto col PID (Fase 4A) sulla stessa dinamica e con lo stesso disturbo:
+
+- l'RL impara un controllore **veloce e stabile** da zero;
+- ma il **PID ben tarato è più preciso** (RMSE 0.41 vs 0.79 keV): grazie al
+  termine integrale azzera l'errore stazionario, mentre l'agente RL conserva un
+  piccolo offset.
+
+È l'esito atteso: su un sistema così semplice il PID è quasi imbattibile; il
+vantaggio dell'RL emerge su sistemi complessi e ad alta dimensione (come il
+controllo magnetico multi-bobina di TCV). Richiede l'extra `[rl]`.
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -352,6 +372,10 @@ python notebooks/plasma_animation_toroidal.py # GIF accensione, vista dall'alto 
 # Emulatore deep-learning dei profili (richiede PyTorch)
 pip install -e ".[ml]"
 python notebooks/profile_emulator_demo.py
+
+# Controllo con Reinforcement Learning (richiede gymnasium + stable-baselines3)
+pip install -e ".[rl]"
+python notebooks/rl_control_demo.py   # addestra PPO (~qualche minuto)
 ```
 
 ### Dashboard interattiva
