@@ -249,6 +249,60 @@ Fisica + machine learning: predire i risultati del solver, ma ~1000× più veloc
 
 ---
 
+# Parte III — Machine learning avanzato (fasi 13–16)
+
+> Quattro tecniche ML distinte, ciascuna ancorata alla fisica del progetto:
+> classificazione, ottimizzazione bayesiana, deep learning di regressione e
+> reinforcement learning. Ordine guidato da dipendenze e rischio crescente:
+> **13 → 14 → 15 → 16**.
+
+## Fase 13 — Predizione di disruption (classificazione)
+
+Una delle applicazioni ML piu' reali in fusione: predire se un punto operativo
+e' stabile o va in disruption.
+
+- [ ] Generare un dataset etichettato (stabile / disrupt) dai vincoli operativi
+      (Greenwald, Troyon) ed eventuale runaway termico
+- [ ] Addestrare un classificatore (gradient boosting / logistic) e valutarlo
+      (accuratezza, ROC-AUC, matrice di confusione) su un test set
+- [ ] Visualizzare la "regione sicura" appresa sul piano (T, n_e)
+
+**Dipendenze:** Fasi 3, 6. **Commit:** `feat: ML disruption prediction`
+
+## Fase 14 — Ottimizzazione bayesiana del punto operativo
+
+- [ ] Ottimizzazione bayesiana (GP della Fase 11 + funzione di acquisizione,
+      es. Expected Improvement) per massimizzare Q/P_fus con poche valutazioni
+- [ ] Confronto col risultato dell'ottimizzatore della Fase 8 e con la
+      convergenza al variare del numero di valutazioni
+
+**Dipendenze:** Fasi 8, 11. **Commit:** `feat: Bayesian optimization of operating point`
+
+## Fase 15 — Emulatore deep-learning dei profili (PyTorch)
+
+Estende l'emulatore scalare (Fase 11) all'intero profilo radiale.
+
+- [ ] Rete neurale (PyTorch) che predice il profilo completo T(r) dai parametri
+      (output vettoriale), addestrata sui dati del solver
+- [ ] Validazione: errore sul profilo, parity plot, speed-up vs solver
+- [ ] Confronto col surrogate GP scalare (tecnica e task diversi)
+
+**Dipendenze:** Fasi 2, 11. **Commit:** `feat: PyTorch neural-network profile emulator`
+
+## Fase 16 — Controllo con Reinforcement Learning
+
+Sostituire il PID fatto a mano con un agente RL (sulla scia di DeepMind/TCV).
+
+- [ ] Ambiente in stile Gym che avvolge la dinamica (combustione/trasporto):
+      stato = (T, ...), azione = potenza di riscaldamento, reward = vicinanza
+      al target meno il costo del controllo
+- [ ] Addestrare un agente (PPO, stable-baselines3) con seed fissati
+- [ ] Confronto RL vs PID su inseguimento del target e reiezione del disturbo
+
+**Dipendenze:** Fasi 4A, 6. **Commit:** `feat: reinforcement-learning plasma control`
+
+---
+
 ## Standard di qualità (trasversali — è ciò che impressiona i recruiter)
 
 - ✅ **Test fisici significativi**, non solo unitari: conservazione, limiti noti,
