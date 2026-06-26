@@ -35,6 +35,7 @@ PHASES = {
     9: ("Controllo di stabilità verticale", NOTEBOOKS / "vertical_control.py"),
     10: ("Ciclo del combustibile / trizio", NOTEBOOKS / "fuel_cycle_demo.py"),
     11: ("Emulatore ML del solver (surrogate)", NOTEBOOKS / "surrogate_demo.py"),
+    13: ("Predizione di disruption (ML)", NOTEBOOKS / "disruption_demo.py"),
 }
 
 
@@ -67,7 +68,7 @@ def main(argv: list[str] | None = None) -> int:
         nargs="+",
         choices=sorted(PHASES),
         metavar="N",
-        help="esegue solo le fasi indicate (1-11)",
+        help="esegue solo le fasi indicate",
     )
     args = parser.parse_args(argv)
 

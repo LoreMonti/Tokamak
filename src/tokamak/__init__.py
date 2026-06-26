@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from .burn import BurnState, simulate_burn, z_effective
 from .control import PIDController, simulate_controlled
+from .disruption import (
+    evaluate_classifier,
+    generate_labeled_dataset,
+    train_disruption_classifier,
+)
 from .engineering import (
     TokamakConfig,
     check_operational_limits,
@@ -86,4 +91,7 @@ __all__ = [
     "generate_dataset",
     "train_surrogate",
     "r2_per_target",
+    "generate_labeled_dataset",
+    "train_disruption_classifier",
+    "evaluate_classifier",
 ]

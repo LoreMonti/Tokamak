@@ -88,6 +88,9 @@ validazione fisica** e una dashboard interattiva.
   con slider sui parametri macchina e aggiornamento dal vivo dei grafici.
 - ✅ **Fase 4B — Kernel C++**: solutore tridiagonale di Thomas in C++ (pybind11)
   come backend alternativo del solver di trasporto, con benchmark vs scipy.
+- ✅ **Fase 13 — Predizione di disruption (ML)**: classificatore (gradient
+  boosting) che predice se un punto operativo è stabile o disrupta; "riscopre"
+  la regione sicura dai soli dati (ROC-AUC ≈ 0.99).
 
 Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
 
@@ -271,6 +274,18 @@ python setup_cpp.py build_ext --inplace  # compila tokamak._tridiag_cpp
 python notebooks/cpp_benchmark.py
 ```
 
+### Predizione di disruption (classificazione ML)
+
+![Disruption](docs/disruption.png)
+
+La probabilità di **disruption** (perdita improvvisa del confinamento) cresce
+avvicinandosi ai limiti operativi. Generiamo etichette campionate da una
+probabilità fisicamente motivata ($\propto$ vicinanza ai limiti di Greenwald e
+Troyon) e addestriamo un classificatore. Risultato: **ROC-AUC ≈ 0.99**, e la
+regione sicura *appresa* dai soli dati coincide con i limiti fisici (verde =
+sicuro, sotto Greenwald e Troyon). È il pattern della predizione di disruzioni in
+tempo reale, una delle applicazioni ML più reali in fusione.
+
 ## Validazione
 
 | Grandezza | Modello | Riferimento |
@@ -305,6 +320,7 @@ python notebooks/optimum_demo.py
 python notebooks/vertical_control.py
 python notebooks/fuel_cycle_demo.py
 python notebooks/surrogate_demo.py   # genera un dataset col solver (lento la 1ª volta)
+python notebooks/disruption_demo.py  # classificatore di disruption (ROC + regione sicura)
 python notebooks/plasma_animation.py          # GIF accensione, sezione poloidale (D)
 python notebooks/plasma_animation_toroidal.py # GIF accensione, vista dall'alto (anello)
 ```
