@@ -1,6 +1,6 @@
 # ⚛️ Tokamak — Simulatore di un reattore a fusione
 
-[![CI](https://github.com/lorenzomonti/Tokamak/actions/workflows/ci.yml/badge.svg)](https://github.com/lorenzomonti/Tokamak/actions/workflows/ci.yml)
+[![CI](https://github.com/LoreMonti/Tokamak/actions/workflows/ci.yml/badge.svg)](https://github.com/LoreMonti/Tokamak/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![tests](https://img.shields.io/badge/tests-74%20passed-brightgreen)
 ![lint](https://img.shields.io/badge/lint-ruff-orange)
