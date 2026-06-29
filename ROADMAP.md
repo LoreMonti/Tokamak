@@ -1,332 +1,332 @@
-# Tokamak — Simulatore di trasporto e bilancio di potenza di un plasma da fusione
+# Tokamak — Transport and power-balance simulator of a fusion plasma
 
-Simulatore della fisica di confinamento di un reattore a fusione (tokamak), dal
-bilancio di potenza 0D al trasporto radiale 1D, con vincoli ingegneristici reali.
+A simulator of the confinement physics of a fusion reactor (tokamak), from the
+0D power balance to 1D radial transport, with real engineering constraints.
 
-**Obiettivo del progetto:** calcolare il fattore di guadagno di fusione *Q* e le
-condizioni di *ignition* (criterio di Lawson) per configurazioni realistiche tipo
-ITER, partendo dai principi fisici.
+**Project goal:** compute the fusion gain factor *Q* and the *ignition*
+conditions (Lawson criterion) for realistic ITER-like configurations, starting
+from physical first principles.
 
 ---
 
-## Glossario rapido dei concetti chiave
+## Quick glossary of key concepts
 
-| Simbolo | Significato | Ordine di grandezza (ITER) |
+| Symbol | Meaning | Order of magnitude (ITER) |
 |---|---|---|
-| `T` | Temperatura del plasma | ~15 keV (~150 milioni K) |
-| `n` | Densità (ioni/elettroni) | ~10²⁰ m⁻³ |
-| `τ_E` | Tempo di confinamento dell'energia | ~3–4 s |
-| `Q` | Potenza fusione / potenza immessa | ~10 (target ITER) |
-| `nTτ_E` | Triplo prodotto (criterio di Lawson) | ~3×10²¹ keV·s·m⁻³ |
+| `T` | Plasma temperature | ~15 keV (~150 million K) |
+| `n` | Density (ions/electrons) | ~10²⁰ m⁻³ |
+| `τ_E` | Energy confinement time | ~3–4 s |
+| `Q` | Fusion power / injected power | ~10 (ITER target) |
+| `nTτ_E` | Triple product (Lawson criterion) | ~3×10²¹ keV·s·m⁻³ |
 
-**Reazione di riferimento:** D + T → ⁴He (3.5 MeV) + n (14.1 MeV).
-Solo l'alfa (3.5 MeV) resta confinato e riscalda il plasma; il neutrone scappa.
+**Reference reaction:** D + T → ⁴He (3.5 MeV) + n (14.1 MeV).
+Only the alpha (3.5 MeV) stays confined and heats the plasma; the neutron escapes.
 
 ---
 
-## Fase 0 — Setup del repository (giorno 1)
+## Phase 0 — Repository setup (day 1)
 
-Obiettivo: repo professionale fin dal primo commit.
+Goal: a professional repo from the very first commit.
 
-- [ ] `git init`, licenza (MIT), `.gitignore` Python
-- [ ] Struttura a pacchetto:
+- [ ] `git init`, license (MIT), Python `.gitignore`
+- [ ] Package structure:
   ```
   tokamak/
   ├── src/tokamak/
   │   ├── __init__.py
-  │   ├── constants.py        # costanti fisiche, masse, energie di reazione
-  │   ├── reactivity.py       # <σv> per D-T in funzione di T
-  │   ├── power_balance.py    # modello 0D
-  │   └── transport.py        # modello 1D (fase 2)
+  │   ├── constants.py        # physical constants, masses, reaction energies
+  │   ├── reactivity.py       # <σv> for D-T as a function of T
+  │   ├── power_balance.py    # 0D model
+  │   └── transport.py        # 1D model (phase 2)
   ├── tests/
-  ├── notebooks/              # esplorazione + figure per il README
+  ├── notebooks/              # exploration + figures for the README
   ├── docs/
   ├── pyproject.toml
   ├── README.md
   └── ROADMAP.md
   ```
-- [ ] `pyproject.toml` con dipendenze: `numpy`, `scipy`, `matplotlib`
+- [ ] `pyproject.toml` with dependencies: `numpy`, `scipy`, `matplotlib`
 - [ ] Tooling: `ruff` (lint+format), `pytest`, GitHub Actions CI (lint + test)
-- [ ] README iniziale con scopo del progetto
+- [ ] Initial README with the project's purpose
 
 **Commit:** `chore: project scaffold and CI`
 
 ---
 
-## Fase 1 — Modello 0D: bilancio di potenza e criterio di Lawson (settimana 1)
+## Phase 1 — 0D model: power balance and Lawson criterion (week 1)
 
-Il cuore fisico-ingegneristico. Nessuna PDE: solo algebra e una reattività.
+The physics/engineering core. No PDE: just algebra and a reactivity.
 
-### 1.1 Reattività D-T `<σv>(T)`
-- [ ] Implementare la parametrizzazione di **Bosch-Hale** per `<σv>` D-T
-      (formula analitica standard, valida 0.2–100 keV)
-- [ ] Test: confronto con valori tabulati di letteratura a 10 e 20 keV
+### 1.1 D-T reactivity `<σv>(T)`
+- [ ] Implement the **Bosch-Hale** parametrization for D-T `<σv>`
+      (standard analytic formula, valid 0.2–100 keV)
+- [ ] Test: comparison with tabulated literature values at 10 and 20 keV
 
-### 1.2 Termini di potenza (densità di potenza, W/m³)
-- [ ] **Fusione:** `P_fus = n_D · n_T · <σv> · E_fus`
-- [ ] **Riscaldamento alfa:** `P_α = (1/5) · P_fus` (solo 3.5/17.6 MeV resta)
-- [ ] **Radiazione di Bremsstrahlung:** `P_brem ∝ Z_eff · n_e² · √T`
-- [ ] **Perdite per confinamento:** `P_loss = W / τ_E`, con `W = 3 n T`
+### 1.2 Power terms (power density, W/m³)
+- [ ] **Fusion:** `P_fus = n_D · n_T · <σv> · E_fus`
+- [ ] **Alpha heating:** `P_α = (1/5) · P_fus` (only 3.5/17.6 MeV stays)
+- [ ] **Bremsstrahlung radiation:** `P_brem ∝ Z_eff · n_e² · √T`
+- [ ] **Confinement losses:** `P_loss = W / τ_E`, with `W = 3 n T`
 
-### 1.3 Equilibrio e figure di merito
-- [ ] Calcolo del fattore **Q = P_fus / P_heat**
-- [ ] Condizione di **ignition**: `P_α ≥ P_loss + P_brem`
-- [ ] **Criterio di Lawson**: ricavare la curva `n·τ_E` vs `T` minima
+### 1.3 Equilibrium and figures of merit
+- [ ] Compute the **Q = P_fus / P_heat** factor
+- [ ] **Ignition** condition: `P_α ≥ P_loss + P_brem`
+- [ ] **Lawson criterion**: derive the minimum `n·τ_E` vs `T` curve
 
-### 1.4 Deliverable visivo (fondamentale per il CV)
-- [ ] **Diagramma di Lawson**: piano `T` vs `n·τ_E` con curve di break-even,
-      Q=10 e ignition; segnare il punto operativo di ITER
-- [ ] Salvare le figure in `docs/` e inserirle nel README
+### 1.4 Visual deliverable (key for the CV)
+- [ ] **Lawson diagram**: `T` vs `n·τ_E` plane with break-even, Q=10 and
+      ignition curves; mark the ITER operating point
+- [ ] Save the figures in `docs/` and include them in the README
 
-**Validazione:** con parametri ITER (T≈15 keV, n≈10²⁰, τ_E≈3.5 s) devi
-ritrovare Q≈10. Documentalo nel README come prova di correttezza.
+**Validation:** with ITER parameters (T≈15 keV, n≈10²⁰, τ_E≈3.5 s) you must
+recover Q≈10. Document it in the README as a correctness check.
 
 **Commit:** `feat: 0D power balance, Lawson criterion and Q factor`
 
 ---
 
-## Fase 2 — Modello di trasporto 1D radiale (settimane 2–3)
+## Phase 2 — 1D radial transport model (weeks 2–3)
 
-Qui dimostri competenza numerica seria (PDE).
+Here you demonstrate serious numerical skill (PDE).
 
-### 2.1 Equazione di diffusione del calore
-Risolvere lungo il raggio minore `r ∈ [0, a]`:
+### 2.1 Heat diffusion equation
+Solve along the minor radius `r ∈ [0, a]`:
 ```
 ∂(3/2 nT)/∂t = (1/r) ∂/∂r ( r · n·χ · ∂T/∂r ) + S(r)
 ```
-- [ ] Discretizzazione spaziale a volumi finiti (geometria cilindrica/toroidale)
-- [ ] Integrazione temporale **implicita** (Crank-Nicolson o Eulero implicito)
-      per stabilità — risoluzione di sistema tridiagonale (Thomas)
-- [ ] Sorgenti `S(r)`: riscaldamento alfa + riscaldamento esterno; pozzi: radiazione
-- [ ] Condizioni al contorno: simmetria in `r=0`, `T` fissata al bordo
+- [ ] Finite-volume spatial discretization (cylindrical/toroidal geometry)
+- [ ] **Implicit** time integration (Crank-Nicolson or backward Euler) for
+      stability — solving a tridiagonal system (Thomas)
+- [ ] Sources `S(r)`: alpha heating + external heating; sinks: radiation
+- [ ] Boundary conditions: symmetry at `r=0`, `T` fixed at the edge
 
-### 2.2 Profili e accoppiamento
-- [ ] Profili radiali di `T(r)`, `n(r)` → evoluzione fino allo stato stazionario
-- [ ] Calcolo di `τ_E` *emergente* dal profilo (non più imposto)
-- [ ] Integrazione dei termini di potenza sul volume → Q "vero" dal profilo
+### 2.2 Profiles and coupling
+- [ ] Radial profiles of `T(r)`, `n(r)` → evolution to steady state
+- [ ] Compute the `τ_E` *emerging* from the profile (no longer imposed)
+- [ ] Integrate the power terms over the volume → "true" Q from the profile
 
-### 2.3 Validazione numerica
-- [ ] Test di **conservazione dell'energia** (senza sorgenti/perdite)
-- [ ] Confronto con **soluzione analitica** in regime semplice (χ costante, stazionario)
-- [ ] Test di convergenza in griglia e in passo temporale
+### 2.3 Numerical validation
+- [ ] **Energy conservation** test (no sources/losses)
+- [ ] Comparison with the **analytic solution** in a simple regime (constant χ, steady)
+- [ ] Grid and time-step convergence tests
 
 **Commit:** `feat: 1D radial heat transport solver (implicit)`
 
 ---
 
-## Fase 3 — Vincoli ingegneristici (settimana 4)
+## Phase 3 — Engineering constraints (week 4)
 
-La parte che trasforma "fisica" in "progetto di reattore".
+The part that turns "physics" into "reactor design".
 
-- [ ] **Limite di Greenwald** sulla densità: `n_G = I_p / (π a²)`
-- [ ] **Beta limit** (Troyon): rapporto pressione plasma / pressione magnetica
-- [ ] **Carico termico sul divertore**: potenza per unità di superficie sui bersagli
-- [ ] **Scaling law ITER** per `τ_E` (es. IPB98(y,2)) come confronto al τ_E simulato
-- [ ] Diagramma operativo (operational space) con tutti i limiti tracciati
+- [ ] **Greenwald limit** on density: `n_G = I_p / (π a²)`
+- [ ] **Beta limit** (Troyon): plasma pressure / magnetic pressure ratio
+- [ ] **Divertor heat load**: power per unit area on the targets
+- [ ] **ITER scaling law** for `τ_E` (e.g. IPB98(y,2)) as a comparison to the simulated τ_E
+- [ ] Operational-space diagram with all the limits drawn
 
 **Commit:** `feat: engineering operational limits (Greenwald, Troyon, divertor)`
 
 ---
 
-## Fase 4 — Controllo e tocco finale (opzionale, settimana 5+)
+## Phase 4 — Control and finishing touches (optional, week 5+)
 
-Per chi vuole spingere su control engineering / HPC.
+For pushing into control engineering / HPC.
 
-- [ ] **Loop di controllo**: regolatore (PID) sulla potenza di riscaldamento
-      esterno per mantenere un Q o una T target
-- [ ] Simulazione di un transitorio (es. rampa di densità) con risposta del controllore
-- [ ] *(Opzionale HPC)* riscrivere il solver tridiagonale 1D in **C++** e
-      richiamarlo da Python con **pybind11**; benchmark Python vs C++ nel README
-- [ ] *(Opzionale)* modulo equilibrio **Grad-Shafranov** 2D per geometria realistica
+- [ ] **Control loop**: a (PID) regulator on the external heating power to hold
+      a target Q or T
+- [ ] Simulation of a transient (e.g. a density ramp) with the controller's response
+- [ ] *(Optional HPC)* rewrite the 1D tridiagonal solver in **C++** and call it
+      from Python with **pybind11**; Python vs C++ benchmark in the README
+- [ ] *(Optional)* 2D **Grad-Shafranov** equilibrium module for realistic geometry
 
 **Commit:** `feat: feedback control of fusion gain`
 
 ---
 
-# Parte II — Estensioni (fasi 5–12)
+# Part II — Extensions (phases 5–12)
 
-> **Stato:** le fasi 0–3 e 4A (controllo PID) sono completate. Questa seconda
-> parte trasforma la raccolta di moduli in un **simulatore integrato e
-> auto-consistente**, con un ordine guidato dalle DIPENDENZE tra i moduli (non
-> filone per filone): un modulo si fa quando quelli da cui dipende sono pronti.
+> **Status:** phases 0–3 and 4A (PID control) are complete. This second part
+> turns the collection of modules into an **integrated, self-consistent
+> simulator**, with an order driven by the DEPENDENCIES between modules (not
+> theme by theme): a module is done once those it depends on are ready.
 
-Ordine complessivo: **5 → 6 → 7 → 8 → 9 → 10 → 11 → 12**, con la 4B (kernel C++)
-inseribile in qualsiasi momento perché ortogonale al resto.
+Overall order: **5 → 6 → 7 → 8 → 9 → 10 → 11 → 12**, with 4B (C++ kernel)
+insertable at any time since it is orthogonal to the rest.
 
-## Fase 5 — Equilibrio magnetico di Grad-Shafranov (2D)
+## Phase 5 — Grad-Shafranov magnetic equilibrium (2D)
 
-Il pezzo "iconico" della fisica del plasma: le superfici di flusso a forma di D.
+The "iconic" piece of plasma physics: the D-shaped flux surfaces.
 
-- [ ] Risolvere l'equazione di Grad-Shafranov (PDE ellittica 2D nella sezione
-      poloidale R-Z): `Δ*ψ = -μ0 R² dp/dψ - F dF/dψ`
-- [ ] Profili sorgente `p(ψ)` e `FF'(ψ)` parametrizzati
-- [ ] Solver: differenze finite + iterazione di punto fisso (Picard) sul termine
-      non lineare di destra
-- [ ] Visualizzazione delle superfici di flusso annidate + ultima superficie chiusa
-- [ ] Validazione: confronto con la soluzione analitica di Solov'ev
+- [ ] Solve the Grad-Shafranov equation (2D elliptic PDE in the R-Z poloidal
+      cross-section): `Δ*ψ = -μ0 R² dp/dψ - F dF/dψ`
+- [ ] Parametrized source profiles `p(ψ)` and `FF'(ψ)`
+- [ ] Solver: finite differences + fixed-point iteration (Picard) on the
+      nonlinear right-hand side
+- [ ] Visualization of the nested flux surfaces + last closed surface
+- [ ] Validation: comparison with the analytic Solov'ev solution
 
-**Dipendenze:** nessuna (modulo autonomo). **Sblocca:** Fase 9 (controllo forma).
+**Dependencies:** none (standalone module). **Unlocks:** Phase 9 (shape control).
 **Commit:** `feat: 2D Grad-Shafranov equilibrium solver`
 
-## Fase 6 — Combustione auto-consistente (burn dynamics)
+## Phase 6 — Self-consistent burn (burn dynamics)
 
-Chiude il bilancio: oggi `τ_E` emerge ma fuel e cenere sono statici.
+Closes the balance: today `τ_E` emerges but fuel and ash are static.
 
-- [ ] Evoluzione accoppiata di temperatura, densità di combustibile D-T e
-      densità di cenere di elio (He-4 prodotto dalle reazioni)
-- [ ] Consumo del combustibile (burn-up) e accumulo di cenere che diluisce il plasma
-- [ ] Sorgente di rifornimento (fueling) e tempo di confinamento delle particelle
-- [ ] Dinamica di accensione: dimostrare l'ignition come stato auto-sostenuto
-- [ ] Validazione: conservazione del numero di particelle, stato stazionario coerente
+- [ ] Coupled evolution of temperature, D-T fuel density and helium ash density
+      (He-4 produced by the reactions)
+- [ ] Fuel consumption (burn-up) and ash accumulation that dilutes the plasma
+- [ ] Refueling source (fueling) and particle confinement time
+- [ ] Ignition dynamics: demonstrate ignition as a self-sustained state
+- [ ] Validation: particle-number conservation, consistent steady state
 
-**Dipendenze:** Fasi 1–2. **Sblocca:** Fasi 8, 11.
+**Dependencies:** Phases 1–2. **Unlocks:** Phases 8, 11.
 **Commit:** `feat: self-consistent D-T burn with helium ash`
 
-## Fase 7 — Radiazione da impurità e Z_eff
+## Phase 7 — Impurity radiation and Z_eff
 
-- [ ] Modello di radiazione di linea da impurità (es. funzione di raffreddamento)
-- [ ] Calcolo di `Z_eff` da una miscela di impurità data
-- [ ] Effetto sul bilancio di potenza e possibile collasso radiativo
+- [ ] Impurity line-radiation model (e.g. cooling function)
+- [ ] Compute `Z_eff` from a given impurity mixture
+- [ ] Effect on the power balance and possible radiative collapse
 
-**Dipendenze:** Fase 6. **Commit:** `feat: impurity radiation and Z_eff`
+**Dependencies:** Phase 6. **Commit:** `feat: impurity radiation and Z_eff`
 
-## Fase 8 — Ottimizzazione del punto operativo
+## Phase 8 — Operating-point optimization
 
-Lega insieme fisica e vincoli in un unico risultato.
+Ties physics and constraints together into a single result.
 
-- [ ] Funzione obiettivo: massimizzare Q (o densità di potenza di fusione)
-- [ ] Vincoli: limiti di Greenwald, Troyon e divertore (Fase 3)
-- [ ] Ottimizzatore con vincoli (`scipy.optimize`, eventualmente globale)
-- [ ] Mappa del punto operativo ottimo sul diagramma dello spazio operativo
+- [ ] Objective function: maximize Q (or fusion power density)
+- [ ] Constraints: Greenwald, Troyon and divertor limits (Phase 3)
+- [ ] Constrained optimizer (`scipy.optimize`, possibly global)
+- [ ] Map the optimal operating point on the operational-space diagram
 
-**Dipendenze:** Fasi 3, 6. **Commit:** `feat: constrained operating-point optimization`
+**Dependencies:** Phases 3, 6. **Commit:** `feat: constrained operating-point optimization`
 
-## Fase 9 — Controllo di forma e posizione del plasma
+## Phase 9 — Plasma shape and position control
 
-Estende il PID della 4A al problema (instabile!) della posizione verticale.
+Extends the Phase-4A PID to the (unstable!) vertical-position problem.
 
-- [ ] Modello ridotto della dinamica verticale del plasma (instabilità intrinseca)
-- [ ] Controllore di stabilizzazione su correnti delle bobine di campo poloidale
-- [ ] Uso dell'equilibrio di Grad-Shafranov per definire la forma di riferimento
+- [ ] Reduced model of the plasma's vertical dynamics (intrinsic instability)
+- [ ] Stabilizing controller on the poloidal-field coil currents
+- [ ] Use the Grad-Shafranov equilibrium to define the reference shape
 
-**Dipendenze:** Fasi 4A, 5. **Commit:** `feat: vertical position/shape control`
+**Dependencies:** Phases 4A, 5. **Commit:** `feat: vertical position/shape control`
 
-## Fase 10 — Ciclo del combustibile e tritium breeding
+## Phase 10 — Fuel cycle and tritium breeding
 
-- [ ] Bilancio del trizio: produzione nel mantello (breeding ratio) vs consumo
-- [ ] Inventario di trizio e condizione di autosufficienza (TBR > 1)
-- [ ] Collegamento con la potenza neutronica del modello (Fase 1)
+- [ ] Tritium balance: production in the blanket (breeding ratio) vs consumption
+- [ ] Tritium inventory and self-sufficiency condition (TBR > 1)
+- [ ] Link with the model's neutron power (Phase 1)
 
-**Dipendenze:** Fase 1. **Commit:** `feat: tritium fuel cycle and breeding`
+**Dependencies:** Phase 1. **Commit:** `feat: tritium fuel cycle and breeding`
 
-## Fase 11 — Emulatore ML del solver (surrogate model)
+## Phase 11 — ML solver emulator (surrogate model)
 
-Fisica + machine learning: predire i risultati del solver, ma ~1000× più veloce.
+Physics + machine learning: predict the solver's results, but ~1000× faster.
 
-- [ ] Generare un dataset campionando i parametri ed eseguendo il solver 1D/burn
-- [ ] Addestrare un modello (rete neurale o gradient boosting) a predire
-      `T(r)`, `τ_E` o Q dai parametri di input
-- [ ] Validare accuratezza e speed-up; usarlo per scan/ottimizzazione rapidi
+- [ ] Generate a dataset by sampling parameters and running the 1D/burn solver
+- [ ] Train a model (neural network or gradient boosting) to predict
+      `T(r)`, `τ_E` or Q from the input parameters
+- [ ] Validate accuracy and speed-up; use it for fast scans/optimization
 
-**Dipendenze:** Fase 6. **Commit:** `feat: ML surrogate model of the transport solver`
+**Dependencies:** Phase 6. **Commit:** `feat: ML surrogate model of the transport solver`
 
-## Fase 12 — Dashboard interattiva (capstone)
+## Phase 12 — Interactive dashboard (capstone)
 
-- [ ] App (Streamlit/Plotly) per esplorare dal vivo spazio operativo, profili,
-      transitori controllati ed equilibrio
-- [ ] Slider sui parametri macchina con aggiornamento in tempo reale (via emulatore)
+- [ ] App (Streamlit/Plotly) to explore operational space, profiles, controlled
+      transients and equilibrium live
+- [ ] Sliders on the machine parameters with real-time updates (via the emulator)
 
-**Dipendenze:** tutte. **Commit:** `feat: interactive exploration dashboard`
+**Dependencies:** all. **Commit:** `feat: interactive exploration dashboard`
 
-## Fase 4B — Kernel C++ ad alte prestazioni (inseribile quando si vuole)
+## Phase 4B — High-performance C++ kernel (insertable anytime)
 
-- [ ] Riscrivere il solver tridiagonale 1D in C++, esposto con **pybind11**
-- [ ] Validazione numerica contro la versione Python (stessi risultati)
-- [ ] Benchmark Python vs C++ documentato nel README
-- [ ] Integrazione nella build e nella CI
+- [ ] Rewrite the 1D tridiagonal solver in C++, exposed with **pybind11**
+- [ ] Numerical validation against the Python version (identical results)
+- [ ] Python vs C++ benchmark documented in the README
+- [ ] Integration into the build and CI
 
-**Dipendenze:** Fase 2. **Commit:** `perf: C++ tridiagonal kernel via pybind11`
+**Dependencies:** Phase 2. **Commit:** `perf: C++ tridiagonal kernel via pybind11`
 
 ---
 
-# Parte III — Machine learning avanzato (fasi 13–16)
+# Part III — Advanced machine learning (phases 13–16)
 
-> Quattro tecniche ML distinte, ciascuna ancorata alla fisica del progetto:
-> classificazione, ottimizzazione bayesiana, deep learning di regressione e
-> reinforcement learning. Ordine guidato da dipendenze e rischio crescente:
+> Four distinct ML techniques, each anchored to the project's physics:
+> classification, Bayesian optimization, regression deep learning and
+> reinforcement learning. Order driven by dependencies and increasing risk:
 > **13 → 14 → 15 → 16**.
 
-## Fase 13 — Predizione di disruption (classificazione)
+## Phase 13 — Disruption prediction (classification)
 
-Una delle applicazioni ML piu' reali in fusione: predire se un punto operativo
-e' stabile o va in disruption.
+One of the most real ML applications in fusion: predict whether an operating
+point is stable or disrupts.
 
-- [ ] Generare un dataset etichettato (stabile / disrupt) dai vincoli operativi
-      (Greenwald, Troyon) ed eventuale runaway termico
-- [ ] Addestrare un classificatore (gradient boosting / logistic) e valutarlo
-      (accuratezza, ROC-AUC, matrice di confusione) su un test set
-- [ ] Visualizzare la "regione sicura" appresa sul piano (T, n_e)
+- [ ] Generate a labeled dataset (stable / disrupt) from the operational limits
+      (Greenwald, Troyon) and possible thermal runaway
+- [ ] Train a classifier (gradient boosting / logistic) and evaluate it
+      (accuracy, ROC-AUC, confusion matrix) on a test set
+- [ ] Visualize the learned "safe region" on the (T, n_e) plane
 
-**Dipendenze:** Fasi 3, 6. **Commit:** `feat: ML disruption prediction`
+**Dependencies:** Phases 3, 6. **Commit:** `feat: ML disruption prediction`
 
-## Fase 14 — Ottimizzazione bayesiana del punto operativo
+## Phase 14 — Bayesian optimization of the operating point
 
-- [ ] Ottimizzazione bayesiana (GP della Fase 11 + funzione di acquisizione,
-      es. Expected Improvement) per massimizzare Q/P_fus con poche valutazioni
-- [ ] Confronto col risultato dell'ottimizzatore della Fase 8 e con la
-      convergenza al variare del numero di valutazioni
+- [ ] Bayesian optimization (Phase-11 GP + acquisition function, e.g. Expected
+      Improvement) to maximize Q/P_fus with few evaluations
+- [ ] Comparison with the Phase-8 optimizer's result and with the convergence as
+      the number of evaluations varies
 
-**Dipendenze:** Fasi 8, 11. **Commit:** `feat: Bayesian optimization of operating point`
+**Dependencies:** Phases 8, 11. **Commit:** `feat: Bayesian optimization of operating point`
 
-## Fase 15 — Emulatore deep-learning dei profili (PyTorch)
+## Phase 15 — Deep-learning profile emulator (PyTorch)
 
-Estende l'emulatore scalare (Fase 11) all'intero profilo radiale.
+Extends the scalar emulator (Phase 11) to the full radial profile.
 
-- [ ] Rete neurale (PyTorch) che predice il profilo completo T(r) dai parametri
-      (output vettoriale), addestrata sui dati del solver
-- [ ] Validazione: errore sul profilo, parity plot, speed-up vs solver
-- [ ] Confronto col surrogate GP scalare (tecnica e task diversi)
+- [ ] Neural network (PyTorch) that predicts the full profile T(r) from the
+      parameters (vector output), trained on solver data
+- [ ] Validation: profile error, parity plot, speed-up vs solver
+- [ ] Comparison with the scalar GP surrogate (different technique and task)
 
-**Dipendenze:** Fasi 2, 11. **Commit:** `feat: PyTorch neural-network profile emulator`
+**Dependencies:** Phases 2, 11. **Commit:** `feat: PyTorch neural-network profile emulator`
 
-## Fase 16 — Controllo con Reinforcement Learning
+## Phase 16 — Reinforcement-learning control
 
-Sostituire il PID fatto a mano con un agente RL (sulla scia di DeepMind/TCV).
+Replace the hand-tuned PID with an RL agent (following DeepMind/TCV).
 
-- [ ] Ambiente in stile Gym che avvolge la dinamica (combustione/trasporto):
-      stato = (T, ...), azione = potenza di riscaldamento, reward = vicinanza
-      al target meno il costo del controllo
-- [ ] Addestrare un agente (PPO, stable-baselines3) con seed fissati
-- [ ] Confronto RL vs PID su inseguimento del target e reiezione del disturbo
+- [ ] Gym-style environment wrapping the dynamics (burn/transport):
+      state = (T, ...), action = heating power, reward = closeness to the target
+      minus the control cost
+- [ ] Train an agent (PPO, stable-baselines3) with fixed seeds
+- [ ] Compare RL vs PID on target tracking and disturbance rejection
 
-**Dipendenze:** Fasi 4A, 6. **Commit:** `feat: reinforcement-learning plasma control`
-
----
-
-## Standard di qualità (trasversali — è ciò che impressiona i recruiter)
-
-- ✅ **Test fisici significativi**, non solo unitari: conservazione, limiti noti,
-  validazione contro letteratura/ITER
-- ✅ **Type hints** ovunque + `ruff`/`mypy` puliti
-- ✅ **CI verde** su GitHub Actions (badge nel README)
-- ✅ **README narrativo**: il problema fisico, le equazioni in LaTeX, i grafici,
-  la tabella di validazione contro ITER, le istruzioni d'uso
-- ✅ **Notebook dimostrativo** che riproduce le figure principali
-- ✅ Commit atomici con messaggi convenzionali (Conventional Commits)
+**Dependencies:** Phases 4A, 6. **Commit:** `feat: reinforcement-learning plasma control`
 
 ---
 
-## Riferimenti utili
+## Quality standards (cross-cutting — this is what impresses recruiters)
 
-- Bosch & Hale (1992), *Improved formulas for fusion cross-sections and thermal reactivities* — per `<σv>`
-- Wesson, *Tokamaks* — testo di riferimento sulla fisica
-- Freidberg, *Plasma Physics and Fusion Energy* — bilancio di potenza, ingegneria
-- ITER Physics Basis (1999/2007) — scaling laws e parametri di riferimento
+- ✅ **Meaningful physics tests**, not just unit tests: conservation, known
+  limits, validation against literature/ITER
+- ✅ **Type hints** everywhere + clean `ruff`/`mypy`
+- ✅ **Green CI** on GitHub Actions (badge in the README)
+- ✅ **Narrative README**: the physical problem, the equations in LaTeX, the
+  plots, the ITER validation table, the usage instructions
+- ✅ **Demo notebooks** that reproduce the main figures
+- ✅ Atomic commits with conventional messages (Conventional Commits)
 
 ---
 
-## Ordine consigliato di esecuzione
+## Useful references
 
-**Fase 0 → 1** ti dà già un repo presentabile con un risultato fisico forte (il
-diagramma di Lawson + validazione ITER). Fermati lì se hai poco tempo: è già un
-ottimo progetto da CV. Le fasi 2–4 lo trasformano in un progetto *notevole*.
+- Bosch & Hale (1992), *Improved formulas for fusion cross-sections and thermal reactivities* — for `<σv>`
+- Wesson, *Tokamaks* — reference physics textbook
+- Freidberg, *Plasma Physics and Fusion Energy* — power balance, engineering
+- ITER Physics Basis (1999/2007) — scaling laws and reference parameters
+
+---
+
+## Recommended order of execution
+
+**Phase 0 → 1** already gives you a presentable repo with a strong physics result
+(the Lawson diagram + ITER validation). Stop there if you are short on time: it
+is already a great CV project. Phases 2–4 turn it into a *remarkable* one.
