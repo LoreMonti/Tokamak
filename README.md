@@ -1,369 +1,365 @@
-# ⚛️ Tokamak — Simulatore di un reattore a fusione
+# ⚛️ Tokamak — Fusion reactor simulator
 
 [![CI](https://github.com/LoreMonti/Tokamak/actions/workflows/ci.yml/badge.svg)](https://github.com/LoreMonti/Tokamak/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![tests](https://img.shields.io/badge/tests-74%20passed-brightgreen)
+![tests](https://img.shields.io/badge/tests-93%20passed-brightgreen)
 ![lint](https://img.shields.io/badge/lint-ruff-orange)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
-> Simulatore **end-to-end** della fisica, dell'ingegneria e del controllo di un
-> tokamak (reattore a fusione), costruito dai principi primi e validato contro i
-> parametri di ITER.
+> An **end-to-end** simulator of the physics, engineering and control of a
+> tokamak (fusion reactor), built from first principles and validated against
+> ITER parameters.
 
 <p align="center">
-  <img src="docs/plasma_heating_toroidal.gif" alt="Plasma visto dall'alto (anello toroidale)" height="320">
+  <img src="docs/plasma_heating_toroidal.gif" alt="Plasma top view (toroidal ring)" height="320">
   &nbsp;&nbsp;
-  <img src="docs/plasma_heating.gif" alt="Plasma nella sezione poloidale a D" height="320">
+  <img src="docs/plasma_heating.gif" alt="Plasma in the D-shaped poloidal cross-section" height="320">
 </p>
 
-<p align="center"><sub>Accensione del plasma in due viste: a sinistra <b>dall'alto</b>
-(piano toroidale — l'anello con il foro centrale della "ciambella"); a destra la
-<b>sezione poloidale</b> a D (taglio verticale, il centro brillante è l'asse
-magnetico). Il profilo di temperatura 1D (Fase 2) è mappato sulle superfici
-magnetiche dell'equilibrio di Grad-Shafranov (Fase 5). Modello ridotto a scopo
-illustrativo.</sub></p>
+<p align="center"><sub>Plasma ignition in two views: left, the <b>top view</b>
+(toroidal plane — the ring with the central "donut" hole); right, the
+<b>poloidal cross-section</b> (vertical D-shaped slice, the bright center is the
+magnetic axis). The 1D temperature profile (Phase 2) is mapped onto the magnetic
+surfaces of the Grad-Shafranov equilibrium (Phase 5). Reduced model, for
+illustration.</sub></p>
 
-**Domanda guida:** un plasma D-T a una data densità, temperatura e qualità di
-confinamento, produce più energia di quanta ne serva per restare caldo? E la
-macchina che lo contiene, regge?
+**Guiding question:** does a D-T plasma, at a given density, temperature and
+confinement quality, produce more energy than it takes to stay hot? And does the
+machine that contains it survive?
 
-Il progetto parte dalla reattività nucleare e arriva a un simulatore integrato:
-trasporto del calore, vincoli ingegneristici, controllo in retroazione,
-combustione auto-consistente, equilibrio magnetico 2D, ottimizzazione, un
-emulatore ML e un kernel C++ — il tutto con una rete di **74 test di
-validazione fisica** e una dashboard interattiva.
+The project starts from nuclear reactivity and builds up to an integrated
+simulator: heat transport, engineering limits, feedback control, self-consistent
+burn, 2D magnetic equilibrium, optimization, an ML emulator and a C++ kernel —
+all backed by **93 physics-validation tests** and an interactive dashboard.
 
-### Cosa dimostra questo progetto
+### What this project demonstrates
 
-- **Fisica del plasma**: reattività, bilancio di potenza, criterio di Lawson,
-  equilibrio MHD (Grad-Shafranov), combustione e radiazione.
-- **Metodi numerici**: PDE di diffusione (schema implicito a volumi finiti),
-  solver ellittici sparsi, integrazione di ODE, ottimizzazione vincolata.
-- **Ingegneria del reattore**: limiti operativi (Greenwald, Troyon, divertore),
-  ciclo del combustibile e tritium breeding.
-- **Teoria del controllo**: regolatori PID/PD, saturazione, anti-windup,
-  reiezione del disturbo, stabilizzazione di un sistema instabile.
-- **Machine learning**: surrogate model (processo gaussiano) del solver.
-- **Software/HPC**: pacchetto testato, CI, kernel **C++** con pybind11,
-  dashboard **Streamlit**.
+- **Plasma physics**: reactivity, power balance, Lawson criterion, MHD
+  equilibrium (Grad-Shafranov), burn and radiation.
+- **Numerical methods**: diffusion PDE (implicit finite-volume scheme), sparse
+  elliptic solvers, ODE integration, constrained optimization.
+- **Reactor engineering**: operational limits (Greenwald, Troyon, divertor),
+  fuel cycle and tritium breeding.
+- **Control theory**: PID/PD controllers, saturation, anti-windup, disturbance
+  rejection, stabilization of an unstable system.
+- **Machine learning**: surrogate models, classification, Bayesian optimization,
+  deep learning, reinforcement learning.
+- **Software/HPC**: tested package, CI, **C++** kernel via pybind11, **Streamlit**
+  dashboard.
 
-### Indice
+### Contents
 
-[Galleria & fisica](#la-fisica-in-breve) ·
-[Validazione](#validazione) ·
-[Struttura](#struttura-del-progetto) ·
-[Uso](#uso) ·
-[Dashboard](#dashboard-interattiva) ·
+[Gallery & physics](#the-physics-in-brief) ·
+[Validation](#validation) ·
+[Structure](#project-structure) ·
+[Usage](#usage) ·
+[Dashboard](#interactive-dashboard) ·
 [Roadmap](ROADMAP.md) ·
-[Riferimenti](#riferimenti)
+[References](#references)
 
-## Cosa c'è dentro (fasi)
+## What's inside (phases)
 
-- ✅ **Fase 1 — Modello 0D**: reattività D-T, bilancio di potenza, fattore di
-  guadagno $Q$ e criterio di Lawson.
-- ✅ **Fase 2 — Trasporto radiale 1D**: equazione di diffusione del calore,
-  solver implicito a volumi finiti, profilo $T(r)$ e $\tau_E$ emergente.
-- ✅ **Fase 3 — Vincoli ingegneristici**: densità di Greenwald, beta limit di
-  Troyon, carico termico sul divertore, diagramma dello spazio operativo.
-- ✅ **Fase 4A — Controllo in retroazione**: regolatore PID (con saturazione e
-  anti-windup) che regola il riscaldamento per mantenere la temperatura al
-  target, con reiezione del disturbo di confinamento.
-- ✅ **Fase 5 — Equilibrio di Grad-Shafranov (2D)**: solver ellittico a
-  differenze finite (algebra sparsa + iterazione di Picard), superfici
-  magnetiche annidate e shift di Shafranov.
-- ✅ **Fase 6 — Combustione auto-consistente**: evoluzione temporale accoppiata
-  di combustibile D-T, cenere di elio ed energia; accensione (ignition) e
-  avvelenamento da cenere ($Z_\text{eff}$).
-- ✅ **Fase 7 — Radiazione da impurità**: $Z_\text{eff}$ da miscela, funzione di
-  raffreddamento ($\sim Z^3$) e soglia di collasso radiativo per specie.
-- ✅ **Fase 8 — Ottimizzazione del punto operativo**: massimizzazione vincolata
-  (SLSQP) della potenza di fusione sotto i limiti di Greenwald e Troyon.
-- ✅ **Fase 9 — Controllo di stabilità verticale**: stabilizzazione PD del plasma
-  allungato (verticalmente instabile), con reiezione del disturbo.
-- ✅ **Fase 10 — Ciclo del combustibile**: consumo e breeding del trizio,
-  bilancio dell'inventario, TBR di autosufficienza e doubling time.
-- ✅ **Fase 11 — Emulatore ML**: surrogate model (processo gaussiano) addestrato
-  sul solver di trasporto; predice $\tau_E$ e $T_0$ con speed-up ~75×.
-- ✅ **Fase 12 — Dashboard interattiva**: app Streamlit che integra tutte le fasi
-  con slider sui parametri macchina e aggiornamento dal vivo dei grafici.
-- ✅ **Fase 4B — Kernel C++**: solutore tridiagonale di Thomas in C++ (pybind11)
-  come backend alternativo del solver di trasporto, con benchmark vs scipy.
-- ✅ **Fase 13 — Predizione di disruption (ML)**: classificatore (gradient
-  boosting) che predice se un punto operativo è stabile o disrupta; "riscopre"
-  la regione sicura dai soli dati (ROC-AUC ≈ 0.99).
-- ✅ **Fase 14 — Ottimizzazione bayesiana**: GP + Expected Improvement che trova
-  il punto operativo ottimo in poche valutazioni (~97% dell'ottimo SLSQP in ~36).
-- ✅ **Fase 15 — Emulatore deep-learning (PyTorch)**: rete neurale che predice
-  l'intero profilo $T(r)$ (output vettoriale), R² ≈ 0.99, speed-up ~100×.
-- ✅ **Fase 16 — Controllo con Reinforcement Learning**: agente PPO che impara a
-  regolare il riscaldamento (gymnasium + stable-baselines3), confrontato col PID.
+- ✅ **Phase 1 — 0D model**: D-T reactivity, power balance, fusion gain $Q$ and
+  the Lawson criterion.
+- ✅ **Phase 2 — 1D radial transport**: heat diffusion equation, implicit
+  finite-volume solver, profile $T(r)$ and emergent $\tau_E$.
+- ✅ **Phase 3 — Engineering limits**: Greenwald density, Troyon beta limit,
+  divertor heat load, operational-space diagram.
+- ✅ **Phase 4A — Feedback control**: PID controller (with saturation and
+  anti-windup) that regulates heating to hold the target temperature, with
+  rejection of a confinement disturbance.
+- ✅ **Phase 5 — Grad-Shafranov equilibrium (2D)**: finite-difference elliptic
+  solver (sparse algebra + Picard iteration), nested magnetic surfaces and the
+  Shafranov shift.
+- ✅ **Phase 6 — Self-consistent burn**: coupled time evolution of D-T fuel,
+  helium ash and energy; ignition and ash poisoning ($Z_\text{eff}$).
+- ✅ **Phase 7 — Impurity radiation**: $Z_\text{eff}$ from a mixture, cooling
+  function ($\sim Z^3$) and radiative-collapse threshold per species.
+- ✅ **Phase 8 — Operating-point optimization**: constrained maximization (SLSQP)
+  of fusion power under the Greenwald and Troyon limits.
+- ✅ **Phase 9 — Vertical stability control**: PD stabilization of the elongated
+  (vertically unstable) plasma, with disturbance rejection.
+- ✅ **Phase 10 — Fuel cycle**: tritium consumption and breeding, inventory
+  balance, self-sufficiency TBR and doubling time.
+- ✅ **Phase 11 — ML emulator**: surrogate model (Gaussian process) trained on the
+  transport solver; predicts $\tau_E$ and $T_0$ with ~75× speed-up.
+- ✅ **Phase 12 — Interactive dashboard**: Streamlit app integrating all phases
+  with sliders on the machine parameters and live-updating plots.
+- ✅ **Phase 4B — C++ kernel**: Thomas tridiagonal solver in C++ (pybind11) as an
+  alternative backend for the transport solver, benchmarked against scipy.
+- ✅ **Phase 13 — Disruption prediction (ML)**: classifier (gradient boosting)
+  that predicts whether an operating point is stable or disrupts; "rediscovers"
+  the safe region from data alone (ROC-AUC ≈ 0.99).
+- ✅ **Phase 14 — Bayesian optimization**: GP + Expected Improvement that finds
+  the optimal operating point in few evaluations (~97% of the SLSQP optimum in ~36).
+- ✅ **Phase 15 — Deep-learning emulator (PyTorch)**: neural network that predicts
+  the full profile $T(r)$ (vector output), R² ≈ 0.99, ~100× speed-up.
+- ✅ **Phase 16 — Reinforcement-learning control**: a PPO agent that learns to
+  regulate heating (gymnasium + stable-baselines3), compared against the PID.
 
-Vedi [ROADMAP.md](ROADMAP.md) per il piano completo.
+See [ROADMAP.md](ROADMAP.md) for the full plan.
 
-## La fisica in breve
+## The physics in brief
 
-Il modello confronta densità di potenza (W/m³) prodotte e perse in un plasma
-D-T 50:50:
+The model compares power densities (W/m³) produced and lost in a 50:50 D-T
+plasma:
 
-| Termine | Significato | Scaling |
+| Term | Meaning | Scaling |
 |---|---|---|
-| $P_\text{fus}$ | Potenza di fusione D-T $\to\ ^4\text{He} + n$ | $\propto n^2\langle\sigma v\rangle$ |
-| $P_\alpha$ | Self-heating delle particelle alfa (resta confinato) | $\approx P_\text{fus}/5$ |
-| $P_\text{brem}$ | Perdita per radiazione di Bremsstrahlung | $\propto n^2\sqrt{T}$ |
-| $P_\text{loss}$ | Perdita per trasporto, $W/\tau_E$ | $\propto nT/\tau_E$ |
+| $P_\text{fus}$ | D-T fusion power $\to\ ^4\text{He} + n$ | $\propto n^2\langle\sigma v\rangle$ |
+| $P_\alpha$ | Alpha-particle self-heating (stays confined) | $\approx P_\text{fus}/5$ |
+| $P_\text{brem}$ | Bremsstrahlung radiation loss | $\propto n^2\sqrt{T}$ |
+| $P_\text{loss}$ | Transport loss, $W/\tau_E$ | $\propto nT/\tau_E$ |
 
-La **reattività** $\langle\sigma v\rangle(T)$ è calcolata come media maxwelliana
-della sezione d'urto di Bosch-Hale, validata contro i valori di letteratura
-(entro ~2% tra 1 e 200 keV, picco a ~66 keV).
+The **reactivity** $\langle\sigma v\rangle(T)$ is computed as the Maxwellian
+average of the Bosch-Hale cross section, validated against literature values
+(within ~2% over 1–200 keV, peak near ~66 keV).
 
-### Criterio di Lawson
+### Lawson criterion
 
-![Diagramma di Lawson](docs/lawson_diagram.png)
+![Lawson diagram](docs/lawson_diagram.png)
 
-Il triplo prodotto $n\,T\,\tau_E$ richiesto per l'ignition ha un **minimo a
-~14 keV**: è la finestra operativa ottimale del D-T. Sotto una temperatura minima
-il Bremsstrahlung domina la fusione e l'ignition diventa impossibile a qualunque
-densità (la curva rossa diverge).
+The triple product $n\,T\,\tau_E$ required for ignition has a **minimum near
+~14 keV**: it is the optimal operating window for D-T. Below a minimum
+temperature, Bremsstrahlung dominates fusion and ignition becomes impossible at
+any density (the red curve diverges).
 
-### Trasporto radiale 1D
+### 1D radial transport
 
-![Profilo radiale](docs/radial_profile.png)
+![Radial profile](docs/radial_profile.png)
 
-Risolviamo l'equazione di diffusione del calore lungo il raggio minore con uno
-schema implicito a volumi finiti (sistema tridiagonale, algoritmo di Thomas):
+We solve the heat diffusion equation along the minor radius with an implicit
+finite-volume scheme (tridiagonal system, Thomas algorithm):
 
 $$\frac{3}{2}n\frac{\partial T}{\partial t} = \frac{1}{r}\frac{\partial}{\partial r}\left(r\,n\chi\,\frac{\partial T}{\partial r}\right) + S(r)$$
 
-A differenza del modello 0D, il tempo di confinamento $\tau_E$ non è imposto ma
-**emerge** dal profilo calcolato, dalla diffusività $\chi$ e dalla geometria.
-Validazione numerica: confronto con la soluzione analitica parabolica (sorgente
-e $\chi$ costanti) e conservazione dell'energia a dominio isolato.
+Unlike the 0D model, the confinement time $\tau_E$ is not imposed but **emerges**
+from the computed profile, the diffusivity $\chi$ and the geometry. Numerical
+validation: comparison with the analytic parabolic solution (constant source and
+$\chi$) and energy conservation on an insulated domain.
 
-### Spazio operativo (vincoli ingegneristici)
+### Operational space (engineering limits)
 
-![Spazio operativo](docs/operational_space.png)
+![Operational space](docs/operational_space.png)
 
-Un reattore deve stare dentro tre limiti fisico-ingegneristici:
+A reactor must stay inside three physics/engineering limits:
 
-| Limite | Formula | Cosa impedisce |
+| Limit | Formula | What it prevents |
 |---|---|---|
-| Greenwald | $n_G = I_p / (\pi a^2)$ | disruption da densità eccessiva |
-| Troyon (beta) | $\beta_\text{max}[\%] = \beta_N\,I_p/(a\,B_t)$ | instabilità MHD da pressione eccessiva |
-| Divertore | $q = P_\text{SOL} / A_\text{bagnata}$ | fusione dei materiali (~10 MW/m²) |
+| Greenwald | $n_G = I_p / (\pi a^2)$ | disruption from excessive density |
+| Troyon (beta) | $\beta_\text{max}[\%] = \beta_N\,I_p/(a\,B_t)$ | MHD instability from excessive pressure |
+| Divertor | $q = P_\text{SOL} / A_\text{wetted}$ | melting of materials (~10 MW/m²) |
 
-La finestra operativa utile è la regione che soddisfa **tutti** i vincoli ed è
-sopra la curva di break-even — intorno a 10–15 keV per parametri tipo ITER.
+The useful operating window is the region that satisfies **all** the constraints
+and lies above the break-even curve — around 10–15 keV for ITER-like parameters.
 
-### Controllo in retroazione (PID)
+### Feedback control (PID)
 
-![Controllo PID](docs/control_demo.png)
+![PID control](docs/control_demo.png)
 
-Un regolatore PID regola la potenza di riscaldamento $P_\text{ext}$ per mantenere
-la temperatura centrale a un target:
+A PID controller regulates the heating power $P_\text{ext}$ to hold the core
+temperature at a target:
 
 $$P_\text{ext}(t) = K_p\,e(t) + K_i\!\int e\,dt + K_d\,\frac{de}{dt}, \qquad e = T_\text{target} - T$$
 
-Con saturazione ($0 \le P_\text{ext} \le P_\text{max}$) e anti-windup, come ogni controllore
-reale. La demo mostra la **reiezione del disturbo**: a metà simulazione il
-confinamento si degrada ($\chi$ raddoppia), la temperatura cala e il controllore
-alza la potenza per riportarla al target.
+With saturation ($0 \le P_\text{ext} \le P_\text{max}$) and anti-windup, like any
+real controller. The demo shows **disturbance rejection**: halfway through the
+simulation the confinement degrades ($\chi$ doubles), the temperature drops and
+the controller raises the power to bring it back to target.
 
-### Equilibrio magnetico di Grad-Shafranov
+### Grad-Shafranov magnetic equilibrium
 
-![Superfici di flusso](docs/flux_surfaces.png)
+![Flux surfaces](docs/flux_surfaces.png)
 
-Risolve l'equazione di equilibrio MHD assialsimmetrica per la funzione di flusso
-poloidale $\psi(R,Z)$:
+Solves the axisymmetric MHD equilibrium equation for the poloidal flux function
+$\psi(R,Z)$:
 
 $$\Delta^*\psi = -\mu_0 R^2\,\frac{dp}{d\psi} - F\frac{dF}{d\psi}$$
 
-con un solver ellittico a differenze finite (matrice sparsa) e iterazione di
-Picard sul termine non lineare. Il bordo del plasma è prescritto a forma di **D**
-(elongazione $\kappa$, triangolarità $\delta$ — ciò che fanno le bobine di
-sagomatura). Le curve di livello di $\psi$ sono le superfici magnetiche annidate;
-l'asse magnetico
-risulta spostato verso l'esterno (shift di Shafranov). Validato contro una
-soluzione analitica polinomiale (Solov'ev).
+with a finite-difference elliptic solver (sparse matrix) and Picard iteration on
+the nonlinear term. The plasma boundary is prescribed as a **D** shape
+(elongation $\kappa$, triangularity $\delta$ — what the shaping coils do). The
+level curves of $\psi$ are the nested magnetic surfaces; the magnetic axis comes
+out shifted outward (Shafranov shift). Validated against an analytic polynomial
+solution (Solov'ev).
 
-### Combustione auto-consistente
+### Self-consistent burn
 
-![Combustione D-T](docs/burn_demo.png)
+![D-T burn](docs/burn_demo.png)
 
-Modello 0D dipendente dal tempo che evolve insieme combustibile, cenere ed
-energia:
+A time-dependent 0D model that evolves fuel, ash and energy together:
 
 $$\frac{dn_{DT}}{dt} = S_\text{fuel} - 2R, \qquad \frac{dn_{He}}{dt} = R - \frac{n_{He}}{\tau_p}, \qquad \frac{dU}{dt} = P_\alpha + P_\text{ext} - P_\text{brem} - \frac{U}{\tau_E}$$
 
-La demo mostra l'**accensione**: dopo lo spegnimento del riscaldamento esterno
-il self-heating delle alfa sostiene la combustione. Nel tempo il combustibile si
-consuma e la cenere di elio si accumula, alzando $Z_\text{eff}$ e le perdite — un
-effetto che solo un modello dinamico cattura. Test di conservazione:
-$\Delta n_{He} = -\tfrac12\,\Delta n_{DT}$ (un elio per reazione, due nuclei di
-combustibile consumati).
+The demo shows **ignition**: after the external heating is switched off, alpha
+self-heating sustains the burn. Over time the fuel is consumed and the helium ash
+builds up, raising $Z_\text{eff}$ and the losses — an effect only a dynamic model
+captures. Conservation test: $\Delta n_{He} = -\tfrac12\,\Delta n_{DT}$ (one
+helium per reaction, two fuel nuclei consumed).
 
-### Radiazione da impurità e collasso radiativo
+### Impurity radiation and radiative collapse
 
-![Collasso radiativo](docs/radiative_collapse.png)
+![Radiative collapse](docs/radiative_collapse.png)
 
-Le impurità irraggiano per radiazione di linea, $P_\text{line} = n_e\,n_z\,L_z(T)$,
-con la funzione di raffreddamento che scala circa come $L_z \sim Z^3$. Quando la
-radiazione supera il riscaldamento, la temperatura collassa. Il modello mostra
-che il tungsteno ($Z=74$) è tollerato solo a livello di **ppm**, mentre il
-carbonio fino a ~0.1% — il motivo per cui le impurità ad alto $Z$ sono temute.
+Impurities radiate via line radiation, $P_\text{line} = n_e\,n_z\,L_z(T)$, with a
+cooling function that scales roughly as $L_z \sim Z^3$. When radiation exceeds
+heating, the temperature collapses. The model shows that tungsten ($Z=74$) is
+tolerated only at the **ppm** level, while carbon up to ~0.1% — the reason
+high-$Z$ impurities are feared.
 
-> ⚠️ La funzione di raffreddamento $L_z(T)$ qui è **schematica** (scaling $Z^3$
-> calibrato, non dati ADAS): riproduce il fenomeno, non valori quantitativi.
+> ⚠️ The cooling function $L_z(T)$ here is **schematic** (calibrated $Z^3$
+> scaling, not ADAS data): it reproduces the phenomenon, not quantitative values.
 
-### Ottimizzazione del punto operativo
+### Operating-point optimization
 
-![Punto ottimo](docs/optimum_point.png)
+![Optimal point](docs/optimum_point.png)
 
-Massimizza la densità di potenza di fusione $P_\text{fus}(n,T)$ sotto i vincoli di
-Greenwald e Troyon (SLSQP). L'ottimo cade sul **bordo dei vincoli** — qui sul
-limite di Troyon a ~13.6 keV — perché $P_\text{fus} \propto n^2\langle\sigma v\rangle$
-cresce con densità e temperatura. È la sintesi quantitativa di fisica (fusione) e
-ingegneria (limiti).
+Maximizes the fusion power density $P_\text{fus}(n,T)$ under the Greenwald and
+Troyon constraints (SLSQP). The optimum sits on the **constraint boundary** —
+here on the Troyon limit near ~13.6 keV — because
+$P_\text{fus} \propto n^2\langle\sigma v\rangle$ grows with density and
+temperature. It is the quantitative synthesis of physics (fusion) and
+engineering (limits).
 
-### Controllo di stabilità verticale
+### Vertical stability control
 
-![Controllo verticale](docs/vertical_control.png)
+![Vertical control](docs/vertical_control.png)
 
-I plasmi allungati ($\kappa>1$, forma a D) confinano meglio ma sono
-**verticalmente instabili** (pendolo inverso, $\ddot z = \gamma^2 z + b\,u$).
-Senza controllo fuggono verso la parete in pochi ms; un controllore **PD** (lo
-stesso `PIDController` con $k_i=0$) li stabilizza se $b\,k_p > \gamma^2$. La demo
-confronta anello aperto (fuga) e anello chiuso (stabilizzato + reiezione di un
-disturbo impulsivo).
+Elongated plasmas ($\kappa>1$, D shape) confine better but are **vertically
+unstable** (inverted pendulum, $\ddot z = \gamma^2 z + b\,u$). Without control
+they run into the wall within a few ms; a **PD** controller (the same
+`PIDController` with $k_i=0$) stabilizes them if $b\,k_p > \gamma^2$. The demo
+compares open loop (run-away) and closed loop (stabilized + rejection of an
+impulsive disturbance).
 
-### Ciclo del combustibile (trizio)
+### Fuel cycle (tritium)
 
-![Ciclo del combustibile](docs/fuel_cycle.png)
+![Fuel cycle](docs/fuel_cycle.png)
 
-Il trizio non esiste in natura: va prodotto nel mantello di litio. Un reattore
-da ~3 GW ne brucia ~0.5 kg/giorno, quindi serve $\text{TBR} = \text{prodotto}/\text{consumato} > 1$
-per l'autosufficienza. Il bilancio $dN/dt = (\text{TBR}-1)\,\dot N_\text{burn} - \lambda N + S$
-mostra che solo con TBR>1 l'inventario cresce; il doubling time (per avviare
-nuovi reattori) diverge quando TBR→1.
+Tritium does not exist in nature: it must be bred in the lithium blanket. A
+~3 GW reactor burns ~0.5 kg/day, so self-sufficiency requires
+$\text{TBR} = \text{produced}/\text{consumed} > 1$. The balance
+$dN/dt = (\text{TBR}-1)\,\dot N_\text{burn} - \lambda N + S$ shows that the
+inventory grows only for TBR>1; the doubling time (to start new reactors)
+diverges as TBR→1.
 
-### Emulatore ML del solver (surrogate model)
+### ML surrogate of the solver
 
-![Emulatore](docs/surrogate.png)
+![Surrogate](docs/surrogate.png)
 
-Un modello di machine learning (processo gaussiano) addestrato sui dati del
-solver 1D impara la mappa $(n_e, \chi, P_\text{ext}) \to (\tau_E, T_0)$ e la
-predice in millisecondi (speed-up **~75×**), con $R^2 \approx 0.9$ su dati mai
-visti. È il pattern "physics + ML": un emulatore veloce per scan massicci o
-controllo in tempo
-reale. Gli scostamenti maggiori sono nei rari casi vicini all'ignition (mappa
-molto ripida).
+A machine-learning model (Gaussian process) trained on 1D-solver data learns the
+map $(n_e, \chi, P_\text{ext}) \to (\tau_E, T_0)$ and predicts it in milliseconds
+(speed-up **~75×**), with $R^2 \approx 0.9$ on unseen data. It is the
+"physics + ML" pattern: a fast emulator for massive scans or real-time control.
+The largest deviations are in the rare near-ignition cases (very steep map).
 
-### Kernel C++ ad alte prestazioni (pybind11)
+### High-performance C++ kernel (pybind11)
 
-![Benchmark C++](docs/cpp_benchmark.png)
+![C++ benchmark](docs/cpp_benchmark.png)
 
-Il solutore tridiagonale al cuore dello schema implicito è riscritto in **C++**
-(algoritmo di Thomas) ed esposto a Python con **pybind11**, come backend
-alternativo (`TransportSolver1D(..., backend="cpp")`). Risultati misurati:
+The tridiagonal solver at the heart of the implicit scheme is rewritten in
+**C++** (Thomas algorithm) and exposed to Python with **pybind11**, as an
+alternative backend (`TransportSolver1D(..., backend="cpp")`). Measured results:
 
-- **Singolo solve**: il C++ è **3–13× più veloce** di `scipy.solve_banded` — il
-  solutore bandato *generico* di LAPACK ha un overhead che il Thomas
-  *specializzato* evita (vantaggio massimo sui sistemi piccoli).
-- **Evoluzione completa**: solo **~1.4×**, perché il solve è solo una frazione
-  del costo per passo (legge di Amdahl): la soluzione tridiagonale non è il
-  collo di bottiglia dell'intero step.
+- **Single solve**: C++ is **3–13× faster** than `scipy.solve_banded` — the
+  *generic* LAPACK banded solver has overhead that the *specialized* Thomas
+  avoids (largest gain on small systems).
+- **Full evolution**: only **~1.4×**, because the solve is just a fraction of the
+  per-step cost (Amdahl's law): the tridiagonal solution is not the bottleneck of
+  the whole step.
 
-Il kernel C++ è **opzionale**: senza compilarlo, il pacchetto usa scipy. Build:
+The C++ kernel is **optional**: without compiling it, the package uses scipy. Build:
 
 ```bash
-pip install -e ".[cpp]"                  # aggiunge pybind11
-python setup_cpp.py build_ext --inplace  # compila tokamak._tridiag_cpp
+pip install -e ".[cpp]"                  # adds pybind11
+python setup_cpp.py build_ext --inplace  # compiles tokamak._tridiag_cpp
 python notebooks/cpp_benchmark.py
 ```
 
-### Predizione di disruption (classificazione ML)
+### Disruption prediction (ML classification)
 
 ![Disruption](docs/disruption.png)
 
-La probabilità di **disruption** (perdita improvvisa del confinamento) cresce
-avvicinandosi ai limiti operativi. Generiamo etichette campionate da una
-probabilità fisicamente motivata ($\propto$ vicinanza ai limiti di Greenwald e
-Troyon) e addestriamo un classificatore. Risultato: **ROC-AUC ≈ 0.99**, e la
-regione sicura *appresa* dai soli dati coincide con i limiti fisici (verde =
-sicuro, sotto Greenwald e Troyon). È il pattern della predizione di disruzioni in
-tempo reale, una delle applicazioni ML più reali in fusione.
+The probability of **disruption** (sudden loss of confinement) grows as the
+operating point approaches the limits. We generate labels sampled from a
+physically motivated probability ($\propto$ proximity to the Greenwald and Troyon
+limits) and train a classifier. Result: **ROC-AUC ≈ 0.99**, and the safe region
+*learned* from data alone matches the physical limits (green = safe, below
+Greenwald and Troyon). This is the real-time disruption-prediction pattern, one
+of the most concrete ML applications in fusion.
 
-### Ottimizzazione bayesiana
+### Bayesian optimization
 
-![Ottimizzazione bayesiana](docs/bayesopt.png)
+![Bayesian optimization](docs/bayesopt.png)
 
-Trova il punto operativo che massimizza $P_\text{fus}$ (sotto i vincoli)
-trattandolo come scatola nera: un GP modella la funzione dai punti già valutati e
-l'**Expected Improvement** sceglie il prossimo punto più promettente. Converge a
-**~97% dell'ottimo SLSQP (Fase 8) in ~36 valutazioni**, concentrando i campioni
-vicino all'ottimo (sul bordo di Troyon). È il metodo d'elezione quando ogni
-valutazione è costosa (solver lenti, esperimenti).
+Finds the operating point that maximizes $P_\text{fus}$ (under constraints) by
+treating it as a black box: a GP models the function from the already-evaluated
+points and **Expected Improvement** picks the next most promising point. It
+converges to **~97% of the SLSQP optimum (Phase 8) in ~36 evaluations**,
+concentrating the samples near the optimum (on the Troyon boundary). It is the
+method of choice when each evaluation is expensive (slow solvers, experiments).
 
-### Emulatore deep-learning del profilo (PyTorch)
+### Deep-learning profile emulator (PyTorch)
 
-![Emulatore NN del profilo](docs/profile_emulator.png)
+![NN profile emulator](docs/profile_emulator.png)
 
-Mentre la Fase 11 emula con un GP grandezze *scalari*, qui una **rete neurale**
-(PyTorch) predice l'**intero profilo radiale** $T(r)$ dai parametri — un output
-vettoriale (regressione funzionale). Sui profili di test: **R² ≈ 0.99**, RMSE
-≈ 0.27 keV, **speed-up ~100×**. Richiede l'extra `[ml]` (PyTorch).
+While Phase 11 emulates *scalar* quantities with a GP, here a **neural network**
+(PyTorch) predicts the **full radial profile** $T(r)$ from the parameters — a
+vector output (functional regression). On the test profiles: **R² ≈ 0.99**, RMSE
+≈ 0.27 keV, **~100× speed-up**. Requires the `[ml]` extra (PyTorch).
 
-### Controllo con Reinforcement Learning (PPO vs PID)
+### Reinforcement-learning control (PPO vs PID)
 
-![Controllo RL](docs/rl_control.png)
+![RL control](docs/rl_control.png)
 
-Sulla scia di DeepMind/TCV (*Nature* 2022), un agente **PPO** (gymnasium +
-stable-baselines3) impara a regolare il riscaldamento, **senza modello e senza
-guadagni** — solo per tentativi. Esperimento controllato a tre vie sulla stessa
-dinamica e disturbo, con RMSE al target [keV]:
+Following DeepMind/TCV (*Nature* 2022), a **PPO** agent (gymnasium +
+stable-baselines3) learns to regulate the heating, **without a model and without
+gains** — purely by trial and error. A controlled three-way experiment on the
+same dynamics and disturbance, with RMSE to target [keV]:
 
-| Controllore | RMSE | Note |
+| Controller | RMSE | Notes |
 |---|---|---|
-| **PID** (Fase 4A) | **0.41** | centra il target (termine integrale) |
-| RL energy-aware (costo potenza alto) | 0.90 | veloce, ma offset sotto il target |
-| RL precisione (costo potenza ≈ 0) | 0.86 | offset quasi invariato |
+| **PID** (Phase 4A) | **0.41** | hits the target (integral term) |
+| RL energy-aware (high power cost) | 0.90 | fast, but offset below target |
+| RL precision (power cost ≈ 0) | 0.86 | offset almost unchanged |
 
-Il risultato è **istruttivo**: abbassare il costo della potenza *non* elimina
-l'offset dell'RL. La causa non è il reward shaping ma l'**architettura del
-controllore**: la policy RL è senza memoria (mappa stato→azione e non osserva
-`τ_E`), quindi non può azzerare un disturbo costante — allo stesso stato
-servirebbero azioni diverse prima e dopo il disturbo. Il PID ci riesce proprio
-grazie al **termine integrale**, che accumula la storia dell'errore.
+The result is **instructive**: lowering the power cost does *not* remove the RL
+offset. The cause is not reward shaping but the **controller architecture**: the
+RL policy is memoryless (maps state→action and does not observe `τ_E`), so it
+cannot null out a constant disturbance — the same state would require different
+actions before and after the disturbance. The PID succeeds precisely thanks to
+the **integral term**, which accumulates the error history.
 
-Morale (onesta): su un sistema così semplice il controllo classico è quasi
-imbattibile; il vantaggio dell'RL emerge su sistemi complessi e ad alta
-dimensione (controllo magnetico multi-bobina di TCV). Richiede l'extra `[rl]`.
+Honest takeaway: on such a simple system classical control is almost unbeatable;
+the advantage of RL emerges on complex, high-dimensional systems (multi-coil
+magnetic control of TCV). Requires the `[rl]` extra.
 
-## Validazione
+## Validation
 
-| Grandezza | Modello | Riferimento |
+| Quantity | Model | Reference |
 |---|---|---|
-| $\langle\sigma v\rangle$ a 10 keV | 1.14e-22 m³/s | ~1.1e-22 m³/s |
-| Picco di $\langle\sigma v\rangle$ | 66 keV | ~64 keV |
-| Minimo del triplo prodotto | 14.4 keV | ~14 keV |
-| Frazione alfa | 0.200 | 3.52/17.59 = 0.200 |
+| $\langle\sigma v\rangle$ at 10 keV | 1.14e-22 m³/s | ~1.1e-22 m³/s |
+| Peak of $\langle\sigma v\rangle$ | 66 keV | ~64 keV |
+| Triple-product minimum | 14.4 keV | ~14 keV |
+| Alpha fraction | 0.200 | 3.52/17.59 = 0.200 |
 
-## Uso
+## Usage
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
-# Punto d'ingresso unico: esegue tutte le fasi (e, con --test, anche i test)
-python main.py --test         # test + tutte le fasi (genera le figure in docs/)
-python main.py                # solo le fasi (figure)
-python main.py --phase 15 16  # solo le fasi indicate (con barra di avanzamento)
-python main.py --only-test    # solo i test
+# Single entry point: runs all phases (and, with --test, the tests too)
+python main.py --test         # tests + all phases (generates the figures in docs/)
+python main.py                # phases only (figures)
+python main.py --phase 15 16  # only the listed phases (with a progress bar)
+python main.py --only-test    # tests only
 
-# Le fasi 15 (PyTorch) e 16 (RL) hanno una barra di avanzamento nel terminale e
-# vengono saltate con un avviso se i rispettivi extra non sono installati:
+# Phases 15 (PyTorch) and 16 (RL) show a progress bar in the terminal and are
+# skipped with a warning if the corresponding extras are not installed:
 #   pip install -e ".[ml]" ".[rl]"
 
-# In alternativa, i singoli script:
+# Alternatively, the individual scripts:
 pytest
 python notebooks/lawson_diagram.py
 python notebooks/radial_profile.py
@@ -375,72 +371,76 @@ python notebooks/radiative_collapse.py
 python notebooks/optimum_demo.py
 python notebooks/vertical_control.py
 python notebooks/fuel_cycle_demo.py
-python notebooks/surrogate_demo.py   # genera un dataset col solver (lento la 1ª volta)
-python notebooks/disruption_demo.py  # classificatore di disruption (ROC + regione sicura)
-python notebooks/bayesopt_demo.py    # ottimizzazione bayesiana (convergenza)
-python notebooks/plasma_animation.py          # GIF accensione, sezione poloidale (D)
-python notebooks/plasma_animation_toroidal.py # GIF accensione, vista dall'alto (anello)
+python notebooks/surrogate_demo.py   # generates a dataset with the solver (slow the 1st time)
+python notebooks/disruption_demo.py  # disruption classifier (ROC + safe region)
+python notebooks/bayesopt_demo.py    # Bayesian optimization (convergence)
+python notebooks/plasma_animation.py          # ignition GIF, poloidal cross-section (D)
+python notebooks/plasma_animation_toroidal.py # ignition GIF, top view (ring)
 
-# Emulatore deep-learning dei profili (richiede PyTorch)
+# Deep-learning profile emulator (requires PyTorch)
 pip install -e ".[ml]"
 python notebooks/profile_emulator_demo.py
 
-# Controllo con Reinforcement Learning (richiede gymnasium + stable-baselines3)
+# Reinforcement-learning control (requires gymnasium + stable-baselines3)
 pip install -e ".[rl]"
-python notebooks/rl_control_demo.py   # addestra PPO (~qualche minuto)
+python notebooks/rl_control_demo.py   # trains PPO (~a few minutes)
 ```
 
-### Dashboard interattiva
+### Interactive dashboard
 
 ```bash
-pip install -e ".[app]"     # aggiunge streamlit
-streamlit run dashboard.py  # apre l'app nel browser
+pip install -e ".[app]"     # adds streamlit
+streamlit run dashboard.py  # opens the app in the browser
 ```
 
-L'app integra tutte le fasi: slider su corrente, campo, densità, $\chi$,
-riscaldamento, TBR… con grafici (spazio operativo + ottimo, profilo radiale,
-combustione, ciclo del trizio) aggiornati dal vivo.
+The app integrates all phases: sliders on current, field, density, $\chi$,
+heating, TBR… with plots (operational space + optimum, radial profile, burn,
+tritium cycle) updating live.
 
 ```python
 from tokamak import fusion_gain_Q
 
-# Q in stato stazionario per parametri tipo ITER
+# Steady-state Q for ITER-like parameters
 Q = fusion_gain_Q(n_e=1.0e20, T_keV=15.0, tau_e=2.0)
 ```
 
-## Struttura del progetto
+## Project structure
 
 ```
 Tokamak/
-├── src/tokamak/            # pacchetto: un modulo per dominio fisico
-│   ├── reactivity.py         # <σv>(T) — media maxwelliana della sezione d'urto
-│   ├── power_balance.py      # bilancio 0D, Q, criterio di Lawson
-│   ├── transport.py          # diffusione del calore 1D (implicita, volumi finiti)
-│   ├── engineering.py        # limiti di Greenwald, Troyon, divertore
-│   ├── control.py            # regolatore PID (saturazione + anti-windup)
-│   ├── equilibrium.py        # equilibrio 2D di Grad-Shafranov
-│   ├── burn.py               # combustione D-T auto-consistente + cenere He
-│   ├── radiation.py          # radiazione da impurità, Z_eff, collasso radiativo
-│   ├── optimization.py       # ottimizzazione vincolata del punto operativo
-│   ├── stability.py          # stabilità verticale e suo controllo
-│   ├── fuel_cycle.py         # consumo e breeding del trizio
-│   ├── surrogate.py          # emulatore ML (processo gaussiano)
-│   └── _tridiag.cpp/.py      # kernel C++ (Thomas) + wrapper, via pybind11
-├── tests/                  # 74 test di validazione fisica e numerica
-├── notebooks/              # script che generano le figure in docs/
-├── docs/                   # figure (gallery del README)
-├── dashboard.py            # app interattiva Streamlit
-├── main.py                 # punto d'ingresso unico (fasi + test)
-└── setup_cpp.py            # build dell'estensione C++
+├── src/tokamak/            # package: one module per physics domain
+│   ├── reactivity.py         # <σv>(T) — Maxwellian average of the cross section
+│   ├── power_balance.py      # 0D balance, Q, Lawson criterion
+│   ├── transport.py          # 1D heat diffusion (implicit, finite volume)
+│   ├── engineering.py        # Greenwald, Troyon, divertor limits
+│   ├── control.py            # PID controller (saturation + anti-windup)
+│   ├── equilibrium.py        # 2D Grad-Shafranov equilibrium
+│   ├── burn.py               # self-consistent D-T burn + He ash
+│   ├── radiation.py          # impurity radiation, Z_eff, radiative collapse
+│   ├── optimization.py       # constrained operating-point optimization
+│   ├── stability.py          # vertical stability and its control
+│   ├── fuel_cycle.py         # tritium consumption and breeding
+│   ├── surrogate.py          # ML emulator (Gaussian process)
+│   ├── disruption.py         # disruption-prediction classifier
+│   ├── bayesopt.py           # Bayesian optimization (GP + EI)
+│   ├── profile_emulator.py   # PyTorch profile emulator
+│   ├── rl_control.py         # RL environment + PPO control
+│   └── _tridiag.cpp/.py      # C++ kernel (Thomas) + wrapper, via pybind11
+├── tests/                  # 93 physics and numerical validation tests
+├── notebooks/              # scripts that generate the figures in docs/
+├── docs/                   # figures (README gallery)
+├── dashboard.py            # interactive Streamlit app
+├── main.py                 # single entry point (phases + tests)
+└── setup_cpp.py            # build of the C++ extension
 ```
 
-## Riferimenti
+## References
 
 - H.-S. Bosch & G.M. Hale, *Improved formulas for fusion cross-sections and
   thermal reactivities*, Nucl. Fusion **32** (1992) 611.
 - J. Wesson, *Tokamaks*, Oxford University Press.
 - J. Freidberg, *Plasma Physics and Fusion Energy*, Cambridge University Press.
 
-## Licenza
+## License
 
-Distribuito sotto licenza MIT — vedi [LICENSE](LICENSE).
+Released under the MIT license — see [LICENSE](LICENSE).
